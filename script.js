@@ -33,18 +33,37 @@ window.onload = function () {
     ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
     ctx.fillStyle = color;
     ctx.fill();
-}
+  }
 
-  const curve = new Bezier(200, 550, 200, 300, 500, 300);
-  drawSkeleton(curve);
-  drawCurve(curve);
-  const feu = drawPoint(500, 300);
+  function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
+  let t = 0;
 
-  const middlePoint = curve.get(0.5)
-  drawPoint(middlePoint.x, middlePoint.y)
+  async function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const distancetoEnd = curve.split(0.5, 1)
-  console.log(distancetoEnd.length())
-  console.log(curve.length())
-};
+    const curve = new Bezier(200, 550, 200, 300, 500, 300);
+    drawSkeleton(curve);
+    drawCurve(curve);
+    const feu = drawPoint(500, 300);
+  
+    t += 0.1;
+    if (t > 1) t = 0;
+
+    const middlePoint = curve.get(t)
+    drawPoint(middlePoint.x, middlePoint.y)
+  
+    const distancetoEnd = curve.split(t, 1)
+
+    if (distancetoEnd.length() <= 100) console.log("Je vois un feu !")
+
+    await wait (1000);
+    requestAnimationFrame(animate); // Appelle la fonction d'animation
+  }
+
+  animate(); // Démarre l'animation
+
+ };
+
