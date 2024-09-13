@@ -28,7 +28,23 @@ window.onload = function () {
     ctx.stroke();
   }
 
-  const curve = new Bezier(150,40 , 80,30 , 105,150);
+  function drawPoint(x, y, radius = 6, color = "red") {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+    ctx.fillStyle = color;
+    ctx.fill();
+}
+
+  const curve = new Bezier(200, 550, 200, 300, 500, 300);
   drawSkeleton(curve);
   drawCurve(curve);
+  const feu = drawPoint(500, 300);
+
+
+  const middlePoint = curve.get(0.5)
+  drawPoint(middlePoint.x, middlePoint.y)
+
+  const distancetoEnd = curve.split(0.5, 1)
+  console.log(distancetoEnd.length())
+  console.log(curve.length())
 };
