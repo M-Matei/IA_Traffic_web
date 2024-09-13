@@ -48,17 +48,21 @@ window.onload = function () {
     drawSkeleton(curve);
     drawCurve(curve);
     const feu = drawPoint(500, 300);
-  
-    t += 0.1;
-    if (t > 1) t = 0;
 
     const middlePoint = curve.get(t)
-    drawPoint(middlePoint.x, middlePoint.y)
+    drawPoint(middlePoint.x, middlePoint.y,6,"blue")
   
     const distancetoEnd = curve.split(t, 1)
 
-    if (distancetoEnd.length() <= 100) console.log("Je vois un feu !")
-
+    let stop = false;
+    if ((distancetoEnd.length() <= 20)) {
+        return;
+    } else if (distancetoEnd.length() <= 100){
+        t += 0.1 * (distancetoEnd.length()/100);
+        console.log("Approche d'un feu !");
+    } else {
+        t += 0.1;
+    }
     await wait (1000);
     requestAnimationFrame(animate); // Appelle la fonction d'animation
   }
