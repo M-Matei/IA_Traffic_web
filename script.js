@@ -1,32 +1,34 @@
-import { Bezier } from "./dist/bezier.js";
-import Drawing from "./dist/drawing.js";
+import { Bezier } from "./dist/bezier-3.js"
 
 window.onload = function () {
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
 
-  // Créer une courbe de Bézier quadratique avec des points visibles
-  const bezier = new Bezier(200, 550, 200, 300, 400, 300);
-
-  let t = 0; // Paramètre pour positionner le point sur la courbe
-
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Nettoie le canevas
-
-    // Dessiner la courbe
-    Drawing.drawCurve(ctx, bezier);
-
-    // Dessiner le point en mouvement
-    Drawing.drawMovingPoint(ctx, bezier, t);
-    Drawing.drawPoint(ctx, 400, 300);
-
-    // Met à jour le paramètre t pour le mouvement
-    t += 0.01;
-    if (t > 1) t = 0; // Recommence le mouvement à la fin de la courbe
-
-    requestAnimationFrame(animate); // Appelle la fonction d'animation
+  // Fonction pour dessiner le squelette
+  function drawSkeleton(curve) {
+    const points = curve.points;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) {
+      ctx.lineTo(points[i].x, points[i].y);
+    }
+    ctx.strokeStyle = "#aaa";
+    ctx.stroke();
+  }
+  
+  // Fonction pour dessiner la courbe
+  function drawCurve(curve) {
+    const points = curve.getLUT(); // Look Up Table pour obtenir les points de la courbe
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) {
+      ctx.lineTo(points[i].x, points[i].y);
+    }
+    ctx.strokeStyle = "black";
+    ctx.stroke();
   }
 
-  animate(); // Démarre l'animation
-
+  const curve = new Bezier(150,40 , 80,30 , 105,150);
+  drawSkeleton(curve);
+  drawCurve(curve);
 };
