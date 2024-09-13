@@ -39,7 +39,7 @@ window.onload = function () {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  let t = 0;
+  let step = 0;
 
   async function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -47,22 +47,39 @@ window.onload = function () {
     const curve = new Bezier(200, 550, 200, 300, 500, 300);
     drawSkeleton(curve);
     drawCurve(curve);
-    const feu = drawPoint(500, 300);
 
-    const middlePoint = curve.get(t)
-    drawPoint(middlePoint.x, middlePoint.y,6,"blue")
+    // Feu
+    drawPoint(500, 300);
+
+    const middlePoint = curve.get(step);
+    drawPoint(middlePoint.x, middlePoint.y,6,"blue");
   
-    const distancetoEnd = curve.split(t, 1)
+    const distancetoEnd = curve.split(step, 1)
 
-    let stop = false;
     if ((distancetoEnd.length() <= 20)) {
         return;
     } else if (distancetoEnd.length() <= 100){
-        t += 0.1 * (distancetoEnd.length()/100);
+        step += 0.05 * (distancetoEnd.length()/100);
         console.log("Approche d'un feu !");
     } else {
-        t += 0.1;
+        step += 0.05;
     }
+    
+    const derivative = curve.derivative(step);
+    const tangentX = derivative.x;
+    const tangentY = derivative.y;
+
+    const slope = tangentY / tangentX;
+
+        if ((Math.abs(slope) > Math.tan(Math.PI / 6) && Math.abs(slope) < Math.tan(Math.PI / 3))
+            || (Math.abs(slope) > Math.tan(2*Math.PI / 3) && Math.abs(slope) < Math.tan(5*Math.PI / 6))
+            || (Math.abs(slope) > Math.tan(7*Math.PI / 6) && Math.abs(slope) < Math.tan(4*Math.PI / 3))
+            || (Math.abs(slope) > Math.tan(5*Math.PI / 3) && Math.abs(slope) < Math.tan(11*Math.PI / 6))) {
+
+                step -= 0.02;
+                console.log("Correction de la vitesse");
+        }
+
     await wait (1000);
     requestAnimationFrame(animate); // Appelle la fonction d'animation
   }
