@@ -5,7 +5,9 @@ function app() {
       step: 0,
       curve: null,
       canvas: null,
-      ctx: null,        
+      ctx: null,   
+      road: null,  
+      stepBot : 0,   
       
       // Fonction pour charger le module dynamiquement
       async loadModule() {
@@ -24,6 +26,7 @@ function app() {
           this.canvas = document.getElementById('canvas');
           this.ctx = this.canvas.getContext('2d');
           this.curve = new Bezier(200, 550, 200, 300, 500, 300);
+          this.road = new Bezier(80, 300, 200, 300, 600, 300);
           this.animate();
         });
       },
@@ -69,13 +72,20 @@ function app() {
         this.drawSkeleton(this.curve);
         this.drawCurve(this.curve);
 
+        // Dessine la route principale et un bot
+        this.drawCurve(this.road);
+        const botPoint = this.road.get(this.stepBot);
+        this.drawPoint(botPoint.x, botPoint.y, 6, "green");
+
         // Feu
-        this.drawPoint(500, 300);
+        const feuPoint = this.curve.get(0.8);
+        this.drawPoint(feuPoint.x, feuPoint.y, 6, "red");
 
         const middlePoint = this.curve.get(this.step);
         this.drawPoint(middlePoint.x, middlePoint.y, 6, "blue");
 
-        const distancetoEnd = this.curve.split(this.step, 1);
+        const distancetoEnd = this.curve.split(this.step, 0.8);
+        const distance = this.road.split(this.stepBot, 1);
 
         if (distancetoEnd.length() <= 20) {
           return;
@@ -85,6 +95,8 @@ function app() {
         } else {
           this.step += this.speed ;
         }
+
+        if (distance.length() >= 30 ) this.stepBot += this.speed;
 
         const derivative = this.curve.derivative(this.step);
         const tangentX = derivative.x;
