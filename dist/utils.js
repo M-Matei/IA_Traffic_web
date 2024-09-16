@@ -1,22 +1,18 @@
-import { Bezier } from "./bezier-3.js"
-
-// math-inlining.
-const { abs, cos, sin, acos, atan2, sqrt, pow } = Math;
-
 // cube root function yielding real roots
 function crt(v) {
   return v < 0 ? -pow(-v, 1 / 3) : pow(v, 1 / 3);
 }
 
+// math-inlining.
+const { abs, cos, sin, acos, atan2, sqrt, pow, min, max } = Math;
 // trig constants
 const pi = Math.PI,
   tau = 2 * pi,
-  quart = pi / 2,
   // float precision significant decimal
-  epsilon = 0.000001,
+  //epsilon = 0.000001,
   // extremas used in bbox calculation and similar algorithms
-  nMax = Number.MAX_SAFE_INTEGER || 9007199254740991,
-  nMin = Number.MIN_SAFE_INTEGER || -9007199254740991,
+  //const nMax = Number.MAX_SAFE_INTEGER || 9007199254740991,
+  nMin = Number.MIN_SAFE_INfTEGER || -9007199254740991,
   // a zero coordinate, which is surprisingly useful
   ZERO = { x: 0, y: 0, z: 0 };
 
@@ -845,10 +841,10 @@ const utils = {
       dy1 = p2.y - p1.y,
       dx2 = p3.x - p2.x,
       dy2 = p3.y - p2.y,
-      dx1p = dx1 * cos(quart) - dy1 * sin(quart),
-      dy1p = dx1 * sin(quart) + dy1 * cos(quart),
-      dx2p = dx2 * cos(quart) - dy2 * sin(quart),
-      dy2p = dx2 * sin(quart) + dy2 * cos(quart),
+      dx1p = dx1 * cos(pi / 2) - dy1 * sin(pi / 2),
+      dy1p = dx1 * sin(pi / 2) + dy1 * cos(pi / 2),
+      dx2p = dx2 * cos(pi / 2) - dy2 * sin(pi / 2),
+      dy2p = dx2 * sin(pi / 2) + dy2 * cos(pi / 2),
       // chord midpoints
       mx1 = (p1.x + p2.x) / 2,
       my1 = (p1.y + p2.y) / 2,
@@ -906,4 +902,4 @@ const utils = {
   },
 };
 
-export { utils };
+window.utils = utils;

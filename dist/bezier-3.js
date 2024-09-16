@@ -6,14 +6,11 @@
   This code is MIT licensed.
 **/
 
-import { utils } from "./utils.js";
-import { PolyBezier } from "./poly-bezier.js";
-
 // math-inlining.
-const { abs, min, max, cos, sin, acos, sqrt } = Math;
-const pi = Math.PI;
+const { abs, cos, sin, acos, atan2, sqrt, pow, min, max } = Math;
+// const pi = Math.PI;
 // a zero coordinate, which is surprisingly useful
-const ZERO = { x: 0, y: 0, z: 0 };
+// const ZERO = { x: 0, y: 0, z: 0 };
 
 /**
  * Bezier curve constructor.
@@ -1008,4 +1005,4 @@ class Bezier {
   }
 }
 
-export { Bezier };
+window.Bezier = Bezier;

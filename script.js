@@ -1,90 +1,107 @@
-import { Bezier } from "./dist/bezier-3.js"
+function app() {
+    return {
 
-window.onload = function () {
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
+      speed: 0.05,
+      step: 0,
+      curve: null,
+      canvas: null,
+      ctx: null,        
+      
+      // Fonction pour charger le module dynamiquement
+      async loadModule() {
+        try {
+          // Utilisation de import() pour charger dynamiquement un module
+          const module = await import('./dist/utils.js');
+          const bezierModule = await import('./dist/bezier-3.js');
+        } catch (error) {
+          console.log("Erreur lors du chargement du module");
+          console.error(error);
+        }
+      },
 
-  // Fonction pour dessiner le squelette
-  function drawSkeleton(curve) {
-    const points = curve.points;
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i++) {
-      ctx.lineTo(points[i].x, points[i].y);
-    }
-    ctx.strokeStyle = "#aaa";
-    ctx.stroke();
-  }
-  
-  // Fonction pour dessiner la courbe
-  function drawCurve(curve) {
-    const points = curve.getLUT(); // Look Up Table pour obtenir les points de la courbe
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i++) {
-      ctx.lineTo(points[i].x, points[i].y);
-    }
-    ctx.strokeStyle = "black";
-    ctx.stroke();
-  }
+      init() {
+        this.loadModule().then(() => {
+          this.canvas = document.getElementById('canvas');
+          this.ctx = this.canvas.getContext('2d');
+          this.curve = new Bezier(200, 550, 200, 300, 500, 300);
+          this.animate();
+        });
+      },
 
-  function drawPoint(x, y, radius = 6, color = "red") {
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-    ctx.fillStyle = color;
-    ctx.fill();
-  }
 
-  function wait(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
+      drawSkeleton(curve) {
+        const points = curve.points;
+        this.ctx.beginPath();
+        this.ctx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+          this.ctx.lineTo(points[i].x, points[i].y);
+        }
+        this.ctx.strokeStyle = "#aaa";
+        this.ctx.stroke();
+      },
 
-  let step = 0;
+      drawCurve(curve) {
+        const points = curve.getLUT(); // Look Up Table pour obtenir les points de la courbe
+        this.ctx.beginPath();
+        this.ctx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+          this.ctx.lineTo(points[i].x, points[i].y);
+        }
+        this.ctx.strokeStyle = "black";
+        this.ctx.stroke();
+      },
 
-  async function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawPoint(x, y, radius = 6, color = "red") {
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+        this.ctx.fillStyle = color;
+        this.ctx.fill();
+      },
 
-    const curve = new Bezier(200, 550, 200, 300, 500, 300);
-    drawSkeleton(curve);
-    drawCurve(curve);
+      async wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      },
 
-    // Feu
-    drawPoint(500, 300);
+      async animate() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    const middlePoint = curve.get(step);
-    drawPoint(middlePoint.x, middlePoint.y,6,"blue");
-  
-    const distancetoEnd = curve.split(step, 1)
+        // Dessine le squelette et la courbe
+        this.drawSkeleton(this.curve);
+        this.drawCurve(this.curve);
 
-    if ((distancetoEnd.length() <= 20)) {
-        return;
-    } else if (distancetoEnd.length() <= 100){
-        step += 0.05 * (distancetoEnd.length()/100);
-        console.log("Approche d'un feu !");
-    } else {
-        step += 0.05;
-    }
-    
-    const derivative = curve.derivative(step);
-    const tangentX = derivative.x;
-    const tangentY = derivative.y;
+        // Feu
+        this.drawPoint(500, 300);
 
-    const slope = tangentY / tangentX;
+        const middlePoint = this.curve.get(this.step);
+        this.drawPoint(middlePoint.x, middlePoint.y, 6, "blue");
 
-        if ((Math.abs(slope) > Math.tan(Math.PI / 6) && Math.abs(slope) < Math.tan(Math.PI / 3))
-            || (Math.abs(slope) > Math.tan(2*Math.PI / 3) && Math.abs(slope) < Math.tan(5*Math.PI / 6))
-            || (Math.abs(slope) > Math.tan(7*Math.PI / 6) && Math.abs(slope) < Math.tan(4*Math.PI / 3))
-            || (Math.abs(slope) > Math.tan(5*Math.PI / 3) && Math.abs(slope) < Math.tan(11*Math.PI / 6))) {
+        const distancetoEnd = this.curve.split(this.step, 1);
 
-                step -= 0.02;
-                console.log("Correction de la vitesse");
+        if (distancetoEnd.length() <= 20) {
+          return;
+        } else if (distancetoEnd.length() <= 100) {
+          this.step += this.speed * (distancetoEnd.length() / 100);
+          console.log("Approche d'un feu !");
+        } else {
+          this.step += this.speed ;
         }
 
-    await wait (1000);
-    requestAnimationFrame(animate); // Appelle la fonction d'animation
+        const derivative = this.curve.derivative(this.step);
+        const tangentX = derivative.x;
+        const tangentY = derivative.y;
+        const slope = tangentY / tangentX;
+
+        if (
+          (Math.abs(slope) > Math.tan(Math.PI / 6) && Math.abs(slope) < Math.tan(Math.PI / 3)) ||
+          (Math.abs(slope) > Math.tan(2 * Math.PI / 3) && Math.abs(slope) < Math.tan(5 * Math.PI / 6)) ||
+          (Math.abs(slope) > Math.tan(7 * Math.PI / 6) && Math.abs(slope) < Math.tan(4 * Math.PI / 3)) ||
+          (Math.abs(slope) > Math.tan(5 * Math.PI / 3) && Math.abs(slope) < Math.tan(11 * Math.PI / 6))
+        ) {
+          this.step -= this.speed * 0.6;
+          console.log("Correction de la vitesse");
+        }
+        await this.wait(1000);
+        requestAnimationFrame(() => this.animate());
+      }
+    }
   }
-
-  animate(); // Démarre l'animation
-
- };
-

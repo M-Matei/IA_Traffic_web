@@ -3,10 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bezier.js Demo</title>
+  <title>Bezier.js avec Alpine.js</title>
+
+  <!-- Import Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="script.js"></script>
 </head>
 <body>
-  <canvas id="canvas" width="800" height="600" style="border: 1px solid black;"></canvas>
-  <script type="module" src="script.js"></script>
+  <div x-data="app()" x-init="init()">
+    <canvas id="canvas" width="800" height="600" style="border: 1px solid black;"></canvas>
+    <input type="range" x-model.number="speed" min="0" max="0.1" step="0.01"><span x-text="'Vitesse = ' + speed"></span>
+  </div>
+  </div>
 </body>
 </html>
