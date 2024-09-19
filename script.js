@@ -2,6 +2,7 @@ function app() {
     return {
 
       speed: 0.05,
+      waitTime:null,
       step: 0,
       curve: null,
       curveStart:null,
@@ -31,6 +32,7 @@ function app() {
           this.ctx = this.canvas.getContext('2d');
           this.curve = new Bezier(200, 550, 200, 300, 500, 300);
           this.road = new Bezier(80, 300, 200, 300, 500, 300);
+          this.waitTime = 0;
           this.animate();
         });
       },
@@ -112,9 +114,11 @@ function app() {
 
         if (distancetoFeu.length() <= 20 && this.color === 'red') {
           this.step += 0 ;
+          this.waitTime++ ;
         } else if (distancetoFeu.length() <= 20 && this.color !== 'red') {
           this.speed = 0.05 ;
           this.step += this.speed;
+          this.waitTime = 0 ;
         } else if (distancetoFeu.length() <= 100) {
           this.step += this.speed * (distancetoEnd.length() / 100);
           console.log("Approche d'un feu !");
@@ -140,6 +144,7 @@ function app() {
         }
         await this.wait(1000);
         requestAnimationFrame(() => this.animate());
+        // console.log(this.waitTime);
       }
     }
   }
