@@ -13,7 +13,10 @@ function app() {
       stepBot : 0,
       color: 'red',
       feuPoint: null,
-      
+      mood:'Relax',
+      stateCar:'Neutre',
+      colorCar:null,
+
       // Fonction pour charger le module dynamiquement
       async loadModule() {
         try {
@@ -37,6 +40,25 @@ function app() {
         });
       },
 
+      colored(state){
+        switch(state){
+          case 'Neutre':
+            this.colorCar = 'blue';
+            break;
+          case 'Impatient':
+            this.colorCar = "pink";
+            break;
+          case 'Furieux':
+            this.colorCar = "magenta";
+            break;
+          case 'Heureux':
+            this.colorCar = "darkgreen";
+            break;
+          case "Accident":
+            this.colorCar = "orange";
+            break;
+        }
+      },
 
       drawSkeleton(curve) {
         const points = curve.points;
@@ -60,6 +82,25 @@ function app() {
         this.ctx.stroke();
       },
 
+      // angry <=> tired <=> relax = [5, 8, 12] unités de temps d'attente où le conducteur devient furieux
+      // 3 unitès de temps avant il est impatient
+      waiting(mood, time){
+        switch(mood){
+          case 'Angry':
+            if(time > 5) this.stateCar = 'Furieux';
+            else if (time > 2) this.stateCar = 'Impatient';
+            break;
+          case 'Tired':
+            if(time > 8) this.stateCar = 'Furieux';
+            else if (time > 5) this.stateCar = 'Impatient';
+            break;
+          case 'Relax':
+            if(time > 12) this.stateCar = 'Furieux';
+            else if (time > 9) this.stateCar = 'Impatient';
+            break;
+        }
+      },
+                
       drawPoint(x, y, radius = 6, color = "gray") {
         this.ctx.beginPath();
         this.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
@@ -85,7 +126,7 @@ function app() {
             this.drawPoint(this.feuPoint.x, this.feuPoint.y, 6, 'red');
             this.color = 'red';
         }
-    },
+      },
 
       async animate() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -97,15 +138,13 @@ function app() {
         // Dessine la route principale et un bot
         this.drawCurve(this.road);
         const botPoint = this.road.get(this.stepBot);
-        this.drawPoint(botPoint.x, botPoint.y, 6, "gray");
+        this.drawPoint(botPoint.x, botPoint.y, 6);
 
         // Feu
         this.feuPoint = this.curve.get(0.8);
         this.drawPoint(this.feuPoint.x, this.feuPoint.y, 6, this.color);
 
-        const middlePoint = this.curve.get(this.step);
-        this.drawPoint(middlePoint.x, middlePoint.y, 6, "blue");
-
+        const middlePoint = this.curve.get(this.step-this.speed);
         let distancetoFeu = this.curve.split(this.step, 0.8);
         let distancetoEnd = this.curve.split(this.step, 1);
 
@@ -114,7 +153,7 @@ function app() {
 
         if (distancetoFeu.length() <= 20 && this.color === 'red') {
           this.step += 0 ;
-          this.waitTime++ ;
+          this.waitTime++;
         } else if (distancetoFeu.length() <= 20 && this.color !== 'red') {
           this.speed = 0.05 ;
           this.step += this.speed;
@@ -125,6 +164,10 @@ function app() {
         } else if (distance.length() >= 30 ) {
           this.step += this.speed;
         }
+
+        this.waiting(this.mood, this.waitTime);
+        this.colored(this.stateCar);
+        this.drawPoint(middlePoint.x, middlePoint.y, 6, this.colorCar);
 
         if (distanceBot.length() >= 30 ) this.stepBot += this.speed;
 

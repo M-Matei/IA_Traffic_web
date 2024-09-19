@@ -12,10 +12,33 @@
 <body>
   <div x-data="app()" x-init="init()">
     <canvas id="canvas" width="800" height="600" style="border: 1px solid black;"></canvas>
-    <input type="range" x-model.number="speed" min="0" max="0.1" step="0.01"><span x-text="'Vitesse = ' + speed"></span>
   
-    <button @click="userClick('double')">Double click sur le feu</button>
-    <button @click="userClick('simple')">Click sur le feu</button>
+    <br><br>
+    <fieldset>
+      <legend><b>Distance de déplacement des véhicules en 1 unité de temps</b></legend>
+      <input type="range" x-model.number="speed" min="0" max="0.1" step="0.01"></span>
+    </fieldset>
+
+    <fieldset>
+      <legend><b>Gestion du feu</b></legend>
+      <button @click="userClick('double')">Double click sur le feu</button>
+      <button @click="userClick('simple')">Click sur le feu</button>
+    </fieldset>
+    
+    <fieldset>
+      <legend><b>Comportement du véhicule du joueur</b></legend>
+      <label>Capacité à attendre à un feu avant de devenir 'Furieux' (-1)</label>
+      <select x-model="mood">
+        <option>Angry</option>
+        <option>Tired</option>
+        <option>Relax</option>
+      </select>
+
+      <br><label>Votre conducteur est actuellement : </label>
+      <span x-text="stateCar"></span>
+      
+    </fieldset>
+    
   </div>
   </div>
 </body>
