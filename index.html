@@ -14,8 +14,8 @@
     <canvas id="canvas" width="800" height="600" style="border: 1px solid black;"></canvas>
     <input type="range" x-model.number="speed" min="0" max="0.1" step="0.01"><span x-text="'Vitesse = ' + speed"></span>
   
-    <button @click="userClick('double') ; console.log('d')">Double click sur le feu</button>
-    <button @click="userClick('simple'); console.log('s')">Click sur le feu</button>
+    <button @click="userClick('double')">Double click sur le feu</button>
+    <button @click="userClick('simple')">Click sur le feu</button>
   </div>
   </div>
 </body>

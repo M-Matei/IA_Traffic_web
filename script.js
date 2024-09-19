@@ -4,6 +4,8 @@ function app() {
       speed: 0.05,
       step: 0,
       curve: null,
+      curveStart:null,
+      curveEnd: null,
       canvas: null,
       ctx: null,   
       road: null,  
@@ -28,7 +30,7 @@ function app() {
           this.canvas = document.getElementById('canvas');
           this.ctx = this.canvas.getContext('2d');
           this.curve = new Bezier(200, 550, 200, 300, 500, 300);
-          this.road = new Bezier(80, 300, 200, 300, 600, 300);
+          this.road = new Bezier(80, 300, 200, 300, 500, 300);
           this.animate();
         });
       },
@@ -93,7 +95,7 @@ function app() {
         // Dessine la route principale et un bot
         this.drawCurve(this.road);
         const botPoint = this.road.get(this.stepBot);
-        this.drawPoint(botPoint.x, botPoint.y, 6, "green");
+        this.drawPoint(botPoint.x, botPoint.y, 6, "gray");
 
         // Feu
         this.feuPoint = this.curve.get(0.8);
@@ -102,22 +104,25 @@ function app() {
         const middlePoint = this.curve.get(this.step);
         this.drawPoint(middlePoint.x, middlePoint.y, 6, "blue");
 
+        let distancetoFeu = this.curve.split(this.step, 0.8);
         let distancetoEnd = this.curve.split(this.step, 1);
-        if (this.color === 'red') {
-          distancetoEnd = this.curve.split(this.step, 0.8);
-        }
-        const distance = this.road.split(this.stepBot, 1);
 
-        if (distancetoEnd.length() <= 20) {
-          return;
-        } else if (distancetoEnd.length() <= 100) {
+        const distanceBot = this.road.split(this.stepBot, 1);
+        const distance = this.road.split(this.step, 1);
+
+        if (distancetoFeu.length() <= 20 && this.color === 'red') {
+          this.step += 0 ;
+        } else if (distancetoFeu.length() <= 20 && this.color !== 'red') {
+          this.speed = 0.05 ;
+          this.step += this.speed;
+        } else if (distancetoFeu.length() <= 100) {
           this.step += this.speed * (distancetoEnd.length() / 100);
           console.log("Approche d'un feu !");
-        } else {
-          this.step += this.speed ;
+        } else if (distance.length() >= 30 ) {
+          this.step += this.speed;
         }
 
-        if (distance.length() >= 30 ) this.stepBot += this.speed;
+        if (distanceBot.length() >= 30 ) this.stepBot += this.speed;
 
         const derivative = this.curve.derivative(this.step);
         const tangentX = derivative.x;
