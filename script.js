@@ -14,7 +14,7 @@ function app() {
       stepBot : 0,
       color: 'red',
       feuPoint: null,
-      mood:'Relax',
+      mood:'Calme',
       stateCar:'Neutre',
       colorCar:null,
 
@@ -83,23 +83,23 @@ function app() {
         this.ctx.stroke();
       },
 
-      // angry <=> tired <=> relax = [5, 8, 12] unités de temps d'attente où le conducteur devient furieux
+      // Énervé <=> Fatigué <=> Calme = [5, 8, 12] unités de temps d'attente où le conducteur devient furieux
       // 3 unitès de temps avant il est impatient
       waiting(mood, time){
         switch(mood){
-          case 'Angry':
+          case 'Énervé':
             if(time > 5) {
               this.stateCar = 'Furieux';
               this.consoleLog = '-1 : Conducteur furieux...';
             } else if (time > 2) this.stateCar = 'Impatient';
             break;
-          case 'Tired':
+          case 'Fatigué':
             if(time > 8) {
               this.stateCar = 'Furieux';
               this.consoleLog = '-1 : Conducteur furieux...';
             } else if (time > 5) this.stateCar = 'Impatient';
             break;
-          case 'Relax':
+          case 'Calme':
             if (time > 12) {
               this.stateCar = 'Furieux'; 
               this.consoleLog = '-1 : Conducteur furieux...';
