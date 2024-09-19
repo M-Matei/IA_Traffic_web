@@ -7,7 +7,9 @@ function app() {
       canvas: null,
       ctx: null,   
       road: null,  
-      stepBot : 0,   
+      stepBot : 0,
+      color: 'red',
+      feuPoint: null,
       
       // Fonction pour charger le module dynamiquement
       async loadModule() {
@@ -54,7 +56,7 @@ function app() {
         this.ctx.stroke();
       },
 
-      drawPoint(x, y, radius = 6, color = "red") {
+      drawPoint(x, y, radius = 6, color = "gray") {
         this.ctx.beginPath();
         this.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
         this.ctx.fillStyle = color;
@@ -64,6 +66,22 @@ function app() {
       async wait(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
       },
+
+      userClick(type){
+        if (this.color === 'red' && type === 'double') {
+            this.drawPoint(this.feuPoint.x, this.feuPoint.y, 6, 'green');
+            this.color = 'green';
+        } else if (this.color === 'red' && type === 'simple') {
+            this.drawPoint(this.feuPoint.x, this.feuPoint.y, 6, 'yellow');
+            this.color = 'yellow';
+        } else if (this.color === 'green' && type === 'simple') {
+            this.drawPoint(this.feuPoint.x, this.feuPoint.y, 6, 'red');
+            this.color = 'red';
+        } else if (this.color === 'yellow' && type === 'simple'){
+            this.drawPoint(this.feuPoint.x, this.feuPoint.y, 6, 'red');
+            this.color = 'red';
+        }
+    },
 
       async animate() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -78,13 +96,16 @@ function app() {
         this.drawPoint(botPoint.x, botPoint.y, 6, "green");
 
         // Feu
-        const feuPoint = this.curve.get(0.8);
-        this.drawPoint(feuPoint.x, feuPoint.y, 6, "red");
+        this.feuPoint = this.curve.get(0.8);
+        this.drawPoint(this.feuPoint.x, this.feuPoint.y, 6, this.color);
 
         const middlePoint = this.curve.get(this.step);
         this.drawPoint(middlePoint.x, middlePoint.y, 6, "blue");
 
-        const distancetoEnd = this.curve.split(this.step, 0.8);
+        let distancetoEnd = this.curve.split(this.step, 1);
+        if (this.color === 'red') {
+          distancetoEnd = this.curve.split(this.step, 0.8);
+        }
         const distance = this.road.split(this.stepBot, 1);
 
         if (distancetoEnd.length() <= 20) {
