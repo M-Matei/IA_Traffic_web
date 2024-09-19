@@ -15,17 +15,19 @@
   
     <br><br>
     <fieldset>
-      <legend><b>Distance de déplacement des véhicules en 1 unité de temps</b></legend>
+      <legend><b>Général</b></legend>
+      <label>Dernier message important : </label><b><span x-text="consoleLog"></span></b>
+      <br><label>Distance de déplacement des véhicules en 1 unité de temps</label>
       <input type="range" x-model.number="speed" min="0" max="0.1" step="0.01"></span>
     </fieldset>
 
-    <fieldset>
+    <br><fieldset>
       <legend><b>Gestion du feu</b></legend>
       <button @click="userClick('double')">Double click sur le feu</button>
       <button @click="userClick('simple')">Click sur le feu</button>
     </fieldset>
     
-    <fieldset>
+    <br><fieldset>
       <legend><b>Comportement du véhicule du joueur</b></legend>
       <label>Capacité à attendre à un feu avant de devenir 'Furieux' (-1)</label>
       <select x-model="mood">
@@ -34,8 +36,7 @@
         <option>Relax</option>
       </select>
 
-      <br><label>Votre conducteur est actuellement : </label>
-      <span x-text="stateCar"></span>
+      <br><label>Votre conducteur est actuellement : </label><b><span x-text="stateCar"></span></b>
       
     </fieldset>
     

@@ -1,6 +1,7 @@
 function app() {
     return {
 
+      consoleLog:'',
       speed: 0.05,
       waitTime:null,
       step: 0,
@@ -87,16 +88,22 @@ function app() {
       waiting(mood, time){
         switch(mood){
           case 'Angry':
-            if(time > 5) this.stateCar = 'Furieux';
-            else if (time > 2) this.stateCar = 'Impatient';
+            if(time > 5) {
+              this.stateCar = 'Furieux';
+              this.consoleLog = '-1 : Conducteur furieux...';
+            } else if (time > 2) this.stateCar = 'Impatient';
             break;
           case 'Tired':
-            if(time > 8) this.stateCar = 'Furieux';
-            else if (time > 5) this.stateCar = 'Impatient';
+            if(time > 8) {
+              this.stateCar = 'Furieux';
+              this.consoleLog = '-1 : Conducteur furieux...';
+            } else if (time > 5) this.stateCar = 'Impatient';
             break;
           case 'Relax':
-            if(time > 12) this.stateCar = 'Furieux';
-            else if (time > 9) this.stateCar = 'Impatient';
+            if (time > 12) {
+              this.stateCar = 'Furieux'; 
+              this.consoleLog = '-1 : Conducteur furieux...';
+            } else if (time > 9) this.stateCar = 'Impatient';
             break;
         }
       },
@@ -154,13 +161,14 @@ function app() {
         if (distancetoFeu.length() <= 20 && this.color === 'red') {
           this.step += 0 ;
           this.waitTime++;
+          this.consoleLog = 'Votre véhicule est arrêté au feu, son conducteur patiente !';
         } else if (distancetoFeu.length() <= 20 && this.color !== 'red') {
           this.speed = 0.05 ;
           this.step += this.speed;
           this.waitTime = 0 ;
         } else if (distancetoFeu.length() <= 100) {
           this.step += this.speed * (distancetoEnd.length() / 100);
-          console.log("Approche d'un feu !");
+          this.consoleLog = 'Approche du feu !';
         } else if (distance.length() >= 30 ) {
           this.step += this.speed;
         }
@@ -183,7 +191,7 @@ function app() {
           (Math.abs(slope) > Math.tan(5 * Math.PI / 3) && Math.abs(slope) < Math.tan(11 * Math.PI / 6))
         ) {
           this.step -= this.speed * 0.6;
-          console.log("Correction de la vitesse");
+          this.consoleLog = "Correction de la vitesse";
         }
         await this.wait(1000);
         requestAnimationFrame(() => this.animate());
