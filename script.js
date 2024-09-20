@@ -17,6 +17,7 @@ function app() {
       mood:'Calme',
       stateCar:'Neutre',
       colorCar:null,
+      errors:0,
 
       // Fonction pour charger le module dynamiquement
       async loadModule() {
@@ -106,6 +107,7 @@ function app() {
             } else if (time > 9) this.stateCar = 'Impatient';
             break;
         }
+        if (this.stateCar === 'Furieux') this.errors = 1 ;
       },
                 
       drawPoint(x, y, radius = 6, color = "gray") {
