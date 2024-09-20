@@ -19,6 +19,7 @@ function app() {
       colorCar:null,
       errors:0,
       carsPassed:0,
+      trafficJam:0,
 
       // Fonction pour charger le module dynamiquement
       async loadModule() {
@@ -163,11 +164,13 @@ function app() {
           this.step += 0 ;
           this.waitTime++;
           this.consoleLog = 'Votre véhicule est arrêté au feu, son conducteur patiente !';
+          this.trafficJam = 1 ;
         } else if (distancetoFeu.length() <= 20 && this.color !== 'red') {
           this.speed = 0.05 ;
           this.step += this.speed;          
           this.consoleLog = 'Le véhicule a traversé de feu';
           this.waitTime = 0 ;
+          this.trafficJam = 0 ;
           if (this.color === 'yellow') {
             this.carsPassed++;
             if (this.carsPassed > 1){

@@ -24,8 +24,13 @@
 
     <br><fieldset>
       <legend><b>Gestion du feu</b></legend>
-      <button @click="userClick('double')">Double click sur le feu</button>
-      <button @click="userClick('simple')">Click sur le feu</button>
+      <label>Rouge => Vert</label>
+      <button @click="userClick('double')">DOUBLE CLICK</button><br>
+
+      <label>Vert => Rouge | Jaune => Rouge | Rouge => Jaune</label>
+      <button @click="userClick('simple')">SIMPLE CLICK</button><br>
+
+      <br><label>Nombre de véhicules arrêtés au feu : </label><b><span x-text="trafficJam"></span></b>
     </fieldset>
     
     <br><fieldset>
