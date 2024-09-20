@@ -18,6 +18,7 @@ function app() {
       stateCar:'Neutre',
       colorCar:null,
       errors:0,
+      carsPassed:0,
 
       // Fonction pour charger le module dynamiquement
       async loadModule() {
@@ -123,18 +124,16 @@ function app() {
 
       userClick(type){
         if (this.color === 'red' && type === 'double') {
-            this.drawPoint(this.feuPoint.x, this.feuPoint.y, 8, 'green');
             this.color = 'green';
         } else if (this.color === 'red' && type === 'simple') {
-            this.drawPoint(this.feuPoint.x, this.feuPoint.y, 8, 'yellow');
             this.color = 'yellow';
+            this.waitFeu();
         } else if (this.color === 'green' && type === 'simple') {
-            this.drawPoint(this.feuPoint.x, this.feuPoint.y, 8, 'red');
             this.color = 'red';
         } else if (this.color === 'yellow' && type === 'simple'){
-            this.drawPoint(this.feuPoint.x, this.feuPoint.y, 8, 'red');
             this.color = 'red';
         }
+        this.drawPoint(this.feuPoint.x, this.feuPoint.y, 8, this.color);
       },
 
       async animate() {
@@ -165,10 +164,16 @@ function app() {
           this.waitTime++;
           this.consoleLog = 'Votre véhicule est arrêté au feu, son conducteur patiente !';
         } else if (distancetoFeu.length() <= 20 && this.color !== 'red') {
-          this.consoleLog = 'Le véhicule a traversé de feu';
           this.speed = 0.05 ;
-          this.step += this.speed;
+          this.step += this.speed;          
+          this.consoleLog = 'Le véhicule a traversé de feu';
           this.waitTime = 0 ;
+          if (this.color === 'yellow') {
+            this.carsPassed++;
+            if (this.carsPassed > 1){
+              this.color = 'red';
+            }
+          }
         } else if (distancetoFeu.length() <= 100 && this.step < 0.8 ) {
           this.step += this.speed * (distancetoEnd.length() / 100);
           this.consoleLog = 'Approche du feu !';
