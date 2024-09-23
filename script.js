@@ -21,6 +21,16 @@ function app() {
       carsPassed:0,
       trafficJam:0,
       acurate:'Nulle',
+      score:0,
+      mission:'',
+
+      intervalID:null,
+      chrono:0,
+      startTime:0,
+
+      // déplacement en temps réel de manière fluide
+      lastTimestamp:0,
+      endGame:false,
 
       // Fonction pour charger le module dynamiquement
       async loadModule() {
@@ -32,17 +42,54 @@ function app() {
           console.log("Erreur lors du chargement du module");
           console.error(error);
         }
-      },
+      },      
 
       init() {
         this.loadModule().then(() => {
-          this.canvas = document.getElementById('canvas');
-          this.ctx = this.canvas.getContext('2d');
-          this.curve = new Bezier(200, 550, 200, 300, 500, 300);
-          this.road = new Bezier(80, 300, 200, 300, 500, 300);
-          this.waitTime = 0;
-          this.animate();
+          // Capturer le temps de départ
+            this.startTime = Date.now();
+
+            this.canvas = document.getElementById('canvas');
+            this.ctx = this.canvas.getContext('2d');
+            this.curve = new Bezier(200, 550, 200, 300, 500, 300);
+            this.road = new Bezier(80, 300, 200, 300, 500, 300);
+            this.waitTime = 0;
+
+            this.animate();
+            this.mission = 'Vous avez 30 secondes pour que votre conducteur rejoigne la fin du niveau !';
+            this.start();
         });
+      },
+
+      start() {
+        // Assure-toi que l'intervalle n'est pas déjà en cours
+        if (this.intervalID === null) {
+            // Capture le temps de départ
+            this.startTime = Date.now();
+
+            // Démarrer l'intervalle avec une fonction fléchée
+            this.intervalID = setInterval(() => {
+                this.updateElapsedTime();
+            }, 1000); // 1 seconde
+        }
+      },
+
+      stop() {
+          // Arrêter l'intervalle si un ID existe
+          if (this.intervalID !== null) {
+              clearInterval(this.intervalID);
+              this.intervalID = null; // Réinitialiser l'ID
+          }
+      },
+
+      updateElapsedTime() {
+          // Calculer le temps écoulé en secondes
+          const currentTime = Date.now();
+          this.chrono = Math.floor((currentTime - this.startTime) / 1000);
+          if (parseFloat(this.chrono) >= 30) {
+            this.endGame = true ;
+            this.stop();
+          }
       },
 
       colored(state){
@@ -120,10 +167,6 @@ function app() {
         this.ctx.fill();
       },
 
-      async wait(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-      },
-
       userClick(type){
         if (this.color === 'red' && type === 'double') {
             this.color = 'green';
@@ -136,6 +179,22 @@ function app() {
         }
         this.drawPoint(this.feuPoint.x, this.feuPoint.y, 8, this.color);
       },
+
+      async wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      },
+
+      // déplacement en temps réel de manière fluide
+      // tick(timestamp) {
+      //   if (!this.lastTimestamp) this.lastTimestamp = timestamp;
+      //   this.deltaTime = timestamp - this.lastTimestamp;
+
+      //   // Mettez à jour la position ou l'état en fonction de deltaTime
+      //   this.animate(this.deltaTime);
+
+      //   this.lastTimestamp = timestamp;
+      //   if (!this.endGame) requestAnimationFrame((timestamp) => this.tick(timestamp));
+      // },
 
       async animate() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -195,6 +254,10 @@ function app() {
         // avancer de 1 unité de temps selon la vitesse
         } else if (distance.length() >= 10 ) {
           this.step += this.speed;
+        } else if (distance.length() < 10 ){
+          this.score++;
+          this.consoleLog = '+1 : Conducteur heureux !';
+          this.endGame = true ;
         }
 
         this.waiting(this.mood, this.waitTime);
@@ -219,9 +282,17 @@ function app() {
           this.consoleLog = "Correction de la vitesse";
         }
 
-        await this.wait(1000);
-        requestAnimationFrame(() => this.animate());
-        // console.log(this.waitTime);
+        await this.wait(400);
+        if (!this.endGame) {
+          requestAnimationFrame(() => this.animate());
+        } else if (this.endGame && this.score < 1) {
+          this.consoleLog = 'Fin de la partie : défaite!';
+          this.stop();
+        } else if (this.endGame && this.score !== 0) {
+          this.consoleLog = 'Fin de la partie : victoire!';
+          this.stop();
+        }
       }
     }
+
   }
