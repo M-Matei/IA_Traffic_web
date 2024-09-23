@@ -20,6 +20,7 @@ function app() {
       errors:0,
       carsPassed:0,
       trafficJam:0,
+      acurate:'Nulle',
 
       // Fonction pour charger le module dynamiquement
       async loadModule() {
@@ -128,7 +129,6 @@ function app() {
             this.color = 'green';
         } else if (this.color === 'red' && type === 'simple') {
             this.color = 'yellow';
-            this.waitFeu();
         } else if (this.color === 'green' && type === 'simple') {
             this.color = 'red';
         } else if (this.color === 'yellow' && type === 'simple'){
@@ -160,27 +160,40 @@ function app() {
         const distanceBot = this.road.split(this.stepBot, 1);
         const distance = this.road.split(this.step, 1);
 
+        // arrêt du véhicule au feu rouge
         if (distancetoFeu.length() <= 20 && this.color === 'red') {
           this.step += 0 ;
           this.waitTime++;
           this.consoleLog = 'Votre véhicule est arrêté au feu, son conducteur patiente !';
           this.trafficJam = 1 ;
-        } else if (distancetoFeu.length() <= 20 && this.color !== 'red') {
+
+        // redémarrage après un arrêt au feu
+        } else if (this.color !== 'red' && distancetoFeu.length() <= 20) {
           this.speed = 0.05 ;
           this.step += this.speed;          
-          this.consoleLog = 'Le véhicule a traversé de feu';
           this.waitTime = 0 ;
           this.trafficJam = 0 ;
-          if (this.color === 'yellow') {
-            this.carsPassed++;
-            if (this.carsPassed > 1){
+          this.carsPassed++;
+          this.consoleLog = 'Le véhicule a traversé le feu';
+          if (this.color === 'yellow' && this.acurate === 'Nulle') {
+            if (this.carsPassed === 1){
+              this.color = 'red';
+            }
+          } else if (this.color === 'yellow' && this.acurate === 'Aléatoire') {
+            if (this.carsPassed === 1 && (Math.random() < 0.5)){
+              this.color = 'yellow';
+            } else if (this.carsPassed === 2){
               this.color = 'red';
             }
           }
-        } else if (distancetoFeu.length() <= 100 && this.step < 0.8 ) {
+
+        // approche d'un feu : vision du conducteur pour déccélerer  
+        } else if (distancetoFeu.length() <= 100 && this.step < 0.7) {
           this.step += this.speed * (distancetoEnd.length() / 100);
           this.consoleLog = 'Approche du feu !';
-        } else if (distance.length() >= 30 ) {
+
+        // avancer de 1 unité de temps selon la vitesse
+        } else if (distance.length() >= 10 ) {
           this.step += this.speed;
         }
 
@@ -195,6 +208,7 @@ function app() {
         const tangentY = derivative.y;
         const slope = tangentY / tangentX;
 
+        // tangente de la trajectoire trop pentu : ralentissment 
         if (
           (Math.abs(slope) > Math.tan(Math.PI / 6) && Math.abs(slope) < Math.tan(Math.PI / 3)) ||
           (Math.abs(slope) > Math.tan(2 * Math.PI / 3) && Math.abs(slope) < Math.tan(5 * Math.PI / 6)) ||
@@ -204,6 +218,7 @@ function app() {
           this.step -= this.speed * 0.6;
           this.consoleLog = "Correction de la vitesse";
         }
+
         await this.wait(1000);
         requestAnimationFrame(() => this.animate());
         // console.log(this.waitTime);
