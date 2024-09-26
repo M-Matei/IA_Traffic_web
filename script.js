@@ -86,7 +86,7 @@ function app() {
           // Calculer le temps écoulé en secondes
           const currentTime = Date.now();
           this.chrono = Math.floor((currentTime - this.startTime) / 1000);
-          if (parseFloat(this.chrono) >= 30) {
+          if (parseFloat(this.chrono) >= 10) {
             this.endGame = true ;
             this.stop();
           }
@@ -205,7 +205,7 @@ function app() {
 
         // Dessine la route principale et un bot
         this.drawCurve(this.road);
-        const botPoint = this.road.get(this.stepBot);
+        const botPoint = this.road.get(0.95);
         this.drawPoint(botPoint.x, botPoint.y, 6);
 
         // Feu
@@ -257,14 +257,13 @@ function app() {
         } else if (distance.length() < 10 ){
           this.score++;
           this.consoleLog = '+1 : Conducteur heureux !';
-          this.endGame = true ;
         }
 
         this.waiting(this.mood, this.waitTime);
         this.colored(this.stateCar);
         this.drawPoint(middlePoint.x, middlePoint.y, 6, this.colorCar);
 
-        if (distanceBot.length() >= 30 ) this.stepBot += this.speed;
+        if (distanceBot.length() >= 30 ) this.stepBot += this.speed/2;
 
         const derivative = this.curve.derivative(this.step);
         const tangentX = derivative.x;
@@ -282,7 +281,18 @@ function app() {
           this.consoleLog = "Correction de la vitesse";
         }
 
+        if (Math.abs(middlePoint.x - botPoint.x) <= 5 && Math.abs(middlePoint.y-botPoint.y <= 5 )){
+          this.consoleLog = 'Collision!';
+          this.score--;
+          this.endGame = true;
+        }
+
+        // if (Math.abs(this.step - this.stepBot) <= 10) {
+        //   this.endGame = true ;
+        // }
+
         await this.wait(400);
+
         if (!this.endGame) {
           requestAnimationFrame(() => this.animate());
         } else if (this.endGame && this.score < 1) {

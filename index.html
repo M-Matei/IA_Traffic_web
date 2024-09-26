@@ -17,13 +17,13 @@
     <fieldset>
       <legend><b>Général</b></legend>
       <label><b x-text="'Objectif principal : ' + mission"></b></label>
-      <br><label>Temps écoulé : </label><b><span x-text="chrono"></span></b><label> seconde(s) / 30sec. => Game over </label>
+      <br><label>Temps écoulé : </label><b><span x-text="chrono"></span></b><label> seconde(s) / 10sec. => Game over </label>
 
       <br><br><label>Dernier message important : </label><b><span x-text="consoleLog"></span></b>
       <br><label>Distance de déplacement des véhicules en 1 unité de temps</label>
       <input type="range" x-model.number="speed" min="0" max="0.1" step="0.01"></span>
       <br><label>Score : </label><b><span x-text="score"></span></b>
-      <br><label>Nombre d'erreur(s) </label><b><span x-text="errors"></span></b><label>/10 avant la défaite</label>
+      <br><label>Nombre d'erreur </label><b><span x-text="errors"></span></b><label>/1 avant la défaite</label>
 
     </fieldset>
 
