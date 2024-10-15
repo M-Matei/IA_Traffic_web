@@ -7,37 +7,100 @@
 
   <!-- Import Alpine.js -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
   <script src="script.js"></script>
+  <script src="bot.js"></script>
+  <script src="feu.js"></script>
+  <script src="vehicule.js"></script>
 </head>
 <body>
   <div x-data="app()" x-init="init()">
-    <canvas id="canvas" width="800" height="600" style="border: 1px solid black;"></canvas>
+    <canvas id="canvas" width="800" height="400" style="border: 1px solid black;"></canvas>
   
     <br><br>
-    <fieldset>
+      <button>Construire la simulation</button><aside>Relancer la simulation pour appliquer les changements de paramétrage marqué *</aside>
+    
+    
+    <br><fieldset>
+      <legend><b>Mission personnalisée * </b></legend>
+      <aside>EN COURS D'IMPLÉMENTATION</aside>
+
+    <!--  Implémenter mode infini et mission custom
+
+      <label>Nombre de conducteurs à rendre heureux infinie ? </label> 
+      <input type="checkbox" id="infinite" x-model="infiniteCars"></input> 
+      <div x-show="infiniteCars">
+        <br><label>Nombre de conducteurs à rendre heureux : </label><span x-text="numberCars"></span>
+        <input type="range" x-model="numberCars" min="1" max="30" step="1"></input> 
+      </div>
+      
+      <br><label>Partie chronométrée en secondes</label>
+      <input type="checkbox" id="chronometre" x-model="chronometre"></input>
+      <div x-show="chronometre">
+        <input type="range" x-model="chronoSec" min="15" max="180" step="1"></input> 
+      </div>
+
+      <br><label>Nombre d'incidents avant la fin de partie</label>
+      <input type="range" x-model="errorNumber" min="0" max="15" step="1"></input>
+
+      <br><h3>Dimensions du niveau</h3>
+      <span>Largeur en pixels</span><input type="number" id="widthCanvas" x-model="widthCanvas" min="200" max="800">
+      <span>Hauteur en pixels</span><input type="number" id="heightCanvas" x-model="heightCanvas" min="200" max="800">
+
+
+      <br><h3>Création du niveau composées de 3 voies distinctes</h3>
+
+      <h4>Voie des véhicules contrôlés par le joueur</h4>
+      <span>Abscisse du point de départ de la courbe de Bézier</span><input type="number" id="xDepartJoueur" x-model="xDepartJoueur" min="20" max="widthCanvas-20">
+      <br><span>Ordonnée du point de départ de la courbe de Bézier</span><input type="number" id="yDepartJoueur" x-model="yDepartJoueur" min="20" max="heightCanvas-20">
+
+      <br><br><span>Abscisse du point de contrôle de la courbe de Bézier</span><input type="number" id="xControleJoueur" x-model="xControleJoueur" min="20" max="widthCanvas-20">
+      <br><span>Ordonnée du point de contrôle de la courbe de Bézier</span><input type="number" id="yControleJoueur" x-model="yControleJoueur" min="20" max="heightCanvas-20">
+
+
+      <h4>Voie des véhicules passifs</h4>
+      <span>Abscisse du point de départ de la courbe de Bézier</span><input type="number" id="xDepartBot" x-model="xDepartBot" min="20" max="widthCanvas-20">
+      <br><span>Ordonnée du point de départ de la courbe de Bézier</span><input type="number" id="yDepartBot" x-model="yDepartBot" min="20" max="heightCanvas-20">
+
+      <br><br><span>Abscisse du point de contrôle de la courbe de Bézier</span><input type="number" id="xControleBot" x-model="xControleBot" min="20" max="widthCanvas-20">
+      <br><span>Ordonnée du point de contrôle de la courbe de Bézier</span><input type="number" id="yControleBot" x-model="yControleBot" min="20" max="heightCanvas-20">
+
+      <h4>Voie commune à tous les véhicules</h4>
+      <span>Abscisse du point de fin de la courbe de Bézier</span><input type="number" id="xDepartCommun" x-model="xDepartCommun" min="20" max="widthCanvas-20">
+      <br><span>Ordonnée du point de fin de la courbe de Bézier</span><input type="number" id="yDepartCommun" x-model="yDepartCommun" min="20" max="heightCanvas-20">
+
+      <br><br><span>Abscisse du point de contrôle de la courbe de Bézier</span><input type="number" id="xControleCommun" x-model="xControleCommun" min="20" max="widthCanvas-20">
+      <br><span>Ordonnée du point de contrôle de la courbe de Bézier</span><input type="number" id="yControleCommun" x-model="yControleCommun" min="20" max="heightCanvas-20">
+
+      <h4>Point commun aux 3 voies</h4>
+      <span>Abscisse</span><input type="number" id="xIntersection" x-model="xIntersection" min="20" max="widthCanvas-20">
+      <br><span>Ordonnée</span><input type="number" id="yIntersection" x-model="yIntersection" min="20" max="heightCanvas-20">
+      -->
+
+    </fieldset> 
+
+    <br><fieldset>
       <legend><b>Général</b></legend>
       <label><b x-text="'Objectif principal : ' + mission"></b></label>
-      <br><label>Temps écoulé : </label><b><span x-text="chrono"></span></b><label> seconde(s) / 10sec. => Game over </label>
+      <br><label>Temps écoulé : </label><b><span x-text="chrono"></span></b><label> seconde(s) / 40sec. = Game over * </label>
 
       <br><br><label>Dernier message important : </label><b><span x-text="consoleLog"></span></b>
       <br><label>Distance de déplacement des véhicules en 1 unité de temps</label>
       <input type="range" x-model.number="speed" min="0" max="0.1" step="0.01"></span>
       <br><label>Score : </label><b><span x-text="score"></span></b>
-      <br><label>Nombre d'erreur </label><b><span x-text="errors"></span></b><label>/1 avant la défaite</label>
+      <br><label>* Nombre d'erreur(s) </label><b><span x-text="errors"></span></b><label>/4 avant la défaite</label>
 
     </fieldset>
 
     <br><fieldset>
       <legend><b>Gestion du feu</b></legend>
-      <label>Rouge => Vert</label>
-      <button @click="userClick('double')">DOUBLE CLICK</button><br>
+      <button @click="userClick('double')">Rouge &#8594; Vert</button><br>
 
-      <label>Vert => Rouge | Jaune => Rouge | Rouge => Jaune</label>
-      <button @click="userClick('simple')">SIMPLE CLICK</button><br>
+      <button @click="userClick('simple')">Vert &#8594; Rouge | Jaune &#8594; Rouge | Rouge &#8594; Jaune</button><br>
 
       <br><label>Nombre de véhicules arrêtés au feu : </label><b><span x-text="trafficJam"></span></b>
 
-      <br><label>Imprécision du feu pour faire passer 2 véhicules au jaune</label>
+      <br><br><label>Imprécision du feu pour faire passer 2 véhicules au jaune</label>
       <select x-model="acurate">
         <option>Nulle</option>
         <option>Aléatoire</option>
@@ -46,18 +109,28 @@
     
     <br><fieldset>
       <legend><b>Comportement du véhicule du joueur</b></legend>
+      <b>Premier véhicule</b><br>
       <label>Capacité à attendre à un feu avant de devenir 'Furieux' (-1)</label>
       <select x-model="mood">
+        <option>Grande</option>
+        <option>Moyenne</option>
+        <option>Très faible</option>
+      </select>
+
+      <br><label>Votre conducteur est actuellement : </label><b><span x-text="stateCar"></span></b>
+      
+      <br><br><b>Second véhicule</b><br>
+      <label>Capacité à attendre à un feu avant de devenir 'Furieux' (-1)</label>
+      <select x-model="mood2">
         <option>Énervé</option>
         <option>Fatigué</option>
         <option>Calme</option>
       </select>
 
-      <br><label>Votre conducteur est actuellement : </label><b><span x-text="stateCar"></span></b>
+      <br><label>Votre conducteur est actuellement : </label><b><span x-text="stateCar2"></span></b>
       
     </fieldset>
     
-  </div>
   </div>
 </body>
 </html>
