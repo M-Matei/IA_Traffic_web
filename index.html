@@ -8,10 +8,12 @@
   <!-- Import Alpine.js -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-  <script src="script.js"></script>
+  
+  <script src="game.js"></script>
   <script src="bot.js"></script>
   <script src="feu.js"></script>
   <script src="vehicule.js"></script>
+  <script src="script.js"></script>
 </head>
 <body>
   <div x-data="app()" x-init="init()">
@@ -85,17 +87,16 @@
       <br><label>Temps écoulé : </label><b><span x-text="chrono"></span></b><label> seconde(s) / 40sec. = Game over * </label>
 
       <br><br><label>Dernier message important : </label><b><span x-text="consoleLog"></span></b>
-      <br><label>Distance de déplacement des véhicules en 1 unité de temps</label>
+      <br><label>Distance de déplacement maximale des véhicules en 1 unité de temps</label>
       <input type="range" x-model.number="speed" min="0" max="0.1" step="0.01"></span>
       <br><label>Score : </label><b><span x-text="score"></span></b>
       <br><label>* Nombre d'erreur(s) </label><b><span x-text="errors"></span></b><label>/4 avant la défaite</label>
 
     </fieldset>
 
-    <br><fieldset>
+    <br><fieldset x-show='infosFeu'>
       <legend><b>Gestion du feu</b></legend>
       <button @click="userClick('doubleClick')">Rouge &#8594; Vert</button><br>
-
       <button @click="userClick('simpleClick')">Vert &#8594; Rouge | Jaune &#8594; Rouge | Rouge &#8594; Jaune</button><br>
 
       <br><label>Nombre de véhicules arrêtés au feu : </label><b><span x-text="trafficJam"></span></b>
@@ -107,7 +108,7 @@
       </select>
     </fieldset>
     
-    <br><fieldset>
+    <br><fieldset x-show="infosCar1">
       <legend><b>Comportement du véhicule du joueur</b></legend>
       <b>Premier véhicule</b><br>
       <label>Capacité à attendre à un feu avant de devenir 'Furieux' (-1)</label>
@@ -119,7 +120,7 @@
 
       <br><label>Votre conducteur est actuellement : </label><b><span x-text="stateCar"></span></b>
       
-      <br><br><b>Second véhicule</b><br>
+      <!-- <br><br><b>Second véhicule</b><br>
       <label>Capacité à attendre à un feu avant de devenir 'Furieux' (-1)</label>
       <select x-model="mood2">
         <option>Énervé</option>
@@ -127,7 +128,7 @@
         <option>Calme</option>
       </select>
 
-      <br><label>Votre conducteur est actuellement : </label><b><span x-text="stateCar2"></span></b>
+      <br><label>Votre conducteur est actuellement : </label><b><span x-text="stateCar2"></span></b> -->
       
     </fieldset>
     

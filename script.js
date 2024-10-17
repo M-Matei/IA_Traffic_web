@@ -18,11 +18,19 @@ function app() {
       road: null, // voie des bots
       curve: null, // voie des véhicules-joueur
       common:null, // voie commune
+      speed : 0.5,
 
       consoleLog:'', // message 
       endGame:false, // game over
 
+      infosFeu: false,
       feuPoint: null,
+      trafficJam: 0,
+      acurate: 'Nulle',
+
+      infosCar1 : false,
+      mood : 'Grande',
+      stateCar: 'Neutre',
 
       // déplacement en temps réel de manière fluide
       lastTimestamp:0,
@@ -121,7 +129,7 @@ function app() {
         // Dessine la route principale et un bot
         this.drawCurve(this.road);
 
-        let botPoint = new Bot(0.5, this.road, 'Voiture', 0.05);
+        let botPoint = new Bot(0.5, this.road, 'Voiture', this.speed);
         let coords = botPoint.positionCoords();
         this.drawPoint(coords[0], coords[1], 5);
 
@@ -129,12 +137,16 @@ function app() {
 
         // Feu
         let feu = new Feu(this.acurate, this.curve, 0.8, false);
+        this.infosFeu = true ;
+
         let coordsFeu = feuPoint.positionCoords(0);
         this.drawPoint(coordsFeu[0], coordsFeu[1], 7, feuPoint.state);
 
+        
         // 1ère voiture
-        let car1 = new Vehicule(0.5, this.mood, this.curve, 'Voiture', 0.5);
-
+        let car1 = new Vehicule(0.5, this.mood, this.curve, 'Voiture', this.speed);
+        this.infosCar1 = true ;
+        
         car1.waiting(car1.mood, car1.waitTime);
         car1.colored(car1.stateCar);
         this.drawPoint(car1.x, car1.y, 5, car1.colorCar);
