@@ -6,15 +6,15 @@ function crt(v) {
 // math-inlining.
 const { abs, cos, sin, acos, atan2, sqrt, pow, min, max } = Math;
 // trig constants
-const pi = Math.PI,
-  tau = 2 * pi,
+const pi = Math.PI;
+  const tau = 2 * pi;
   // float precision significant decimal
   //epsilon = 0.000001,
   // extremas used in bbox calculation and similar algorithms
-  //const nMax = Number.MAX_SAFE_INTEGER || 9007199254740991,
-  nMin = Number.MIN_SAFE_INfTEGER || -9007199254740991,
+  const nMax = Number.MAX_SAFE_INTEGER || 9007199254740991;
+  const nMin = Number.MIN_SAFE_INfTEGER || -9007199254740991;
   // a zero coordinate, which is surprisingly useful
-  ZERO = { x: 0, y: 0, z: 0 };
+  const ZERO = { x: 0, y: 0, z: 0 };
 
 // Bezier utility functions
 const utils = {

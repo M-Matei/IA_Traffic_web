@@ -8,7 +8,7 @@
 
 // math-inlining.
 const { abs, cos, sin, acos, atan2, sqrt, pow, min, max } = Math;
-// const pi = Math.PI;
+const pi = Math.PI;
 // a zero coordinate, which is surprisingly useful
 // const ZERO = { x: 0, y: 0, z: 0 };
 
