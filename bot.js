@@ -1,4 +1,4 @@
-class Bot {
+export class Bot {
 
     type = null ; // 'Voiture' or 'Camion'
     diameter = null ; // 6 or 9

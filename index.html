@@ -8,11 +8,13 @@
   <!-- Import Alpine.js -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-  
-  <script src="game.js"></script>
-  <script src="bot.js"></script>
-  <script src="feu.js"></script>
-  <script src="vehicule.js"></script>
+  <link rel="icon" href="roads.png" type="image/png" sizes="32x32">
+  <script type="module">
+    import { Game } from './game.js';
+    import { Bot } from './bot.js';
+    import { Feu } from './feu.js';
+    import { Vehicule } from './vehicule.js';
+  </script>
   <script src="script.js"></script>
 </head>
 <body>
@@ -20,8 +22,9 @@
     <canvas id="canvas" width="800" height="400" style="border: 1px solid black;"></canvas>
   
     <br><br>
-      <button>Construire la simulation</button><aside>Relancer la simulation pour appliquer les changements de paramétrage marqué *</aside>
-    
+    <button @click="animate()">Démarrer la simulation</button><br>
+    <aside>Relancer la simulation ou réactualiser la page pour appliquer les changements de paramétrage marqué *</aside>
+    <aside>Tous les autres paramètres sont modifiés en  temps réel</aside>
     
     <br><fieldset>
       <legend><b>Mission personnalisée * </b></legend>
@@ -81,23 +84,27 @@
 
     </fieldset> 
 
+    
+
     <br><fieldset>
       <legend><b>Général</b></legend>
       <label><b x-text="'Objectif principal : ' + mission"></b></label>
-      <br><label>Temps écoulé : </label><b><span x-text="chrono"></span></b><label> seconde(s) / 40sec. = Game over * </label>
+      <br><label>Temps écoulé : </label><b><span x-text="chrono"></span></b><label> seconde(s) / 40sec. = Game over</label>
 
       <br><br><label>Dernier message important : </label><b><span x-text="consoleLog"></span></b>
       <br><label>Distance de déplacement maximale des véhicules en 1 unité de temps</label>
-      <input type="range" x-model.number="speed" min="0" max="0.1" step="0.01"></span>
+      <input type="range" x-model.number="speed" min="0" max="0.5" step="0.05">
       <br><label>Score : </label><b><span x-text="score"></span></b>
-      <br><label>* Nombre d'erreur(s) </label><b><span x-text="errors"></span></b><label>/4 avant la défaite</label>
+      <br><label>Nombre d'erreur(s) </label><b><span x-text="errors"></span></b><label>/4 avant la défaite</label>
 
     </fieldset>
 
+    <br><b>Interaction avec le feu de circulation</b>
+
     <br><fieldset x-show='infosFeu'>
-      <legend><b>Gestion du feu</b></legend>
-      <button @click="userClick('doubleClick')">Rouge &#8594; Vert</button><br>
-      <button @click="userClick('simpleClick')">Vert &#8594; Rouge | Jaune &#8594; Rouge | Rouge &#8594; Jaune</button><br>
+      <legend>Gestion du feu</legend>
+      <button @click="feu.userClick('doubleClick') ; drawPoint(feu.positionCoords(0)[0], feu.positionCoords(0)[1], 7, feu.state)">Rouge &#8594; Vert</button><br>
+      <button @click="feu.userClick('simpleClick') ; drawPoint(feu.positionCoords(0)[0], feu.positionCoords(0)[1], 7, feu.state);">Vert &#8594; Rouge | Jaune &#8594; Rouge | Rouge &#8594; Jaune</button><br>
 
       <br><label>Nombre de véhicules arrêtés au feu : </label><b><span x-text="trafficJam"></span></b>
 
@@ -108,7 +115,9 @@
       </select>
     </fieldset>
     
-    <br><fieldset x-show="infosCar1">
+    <br><b>Paramètrage de chaque véhicule indépendamment</b>
+    
+    <fieldset x-show="infosCar1">
       <legend><b>Comportement du véhicule du joueur</b></legend>
       <b>Premier véhicule</b><br>
       <label>Capacité à attendre à un feu avant de devenir 'Furieux' (-1)</label>

@@ -1,4 +1,4 @@
-class Vehicule {
+export class Vehicule {
 
     type = null ; // 'Voiture' or 'Camion'
     diameter = null ; // 6 or 9

@@ -1,4 +1,4 @@
-class Feu {
+export class Feu {
 
     state = 'red'; // or 'green' or 'yellow'
     trafficJam = 0 ;
@@ -31,6 +31,5 @@ class Feu {
         } else if (this.state === 'yellow' && type === 'simpleClick'){
             this.state = 'red';
         }
-        // this.drawPoint(this.feuPoint.x, this.feuPoint.y, 7, this.color);
     }
 }

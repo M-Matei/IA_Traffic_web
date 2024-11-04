@@ -1,4 +1,4 @@
-class Game {
+export class Game {
     
     chrono = 0;
     errors = 0;
@@ -6,8 +6,8 @@ class Game {
     consoleLog = '';
     endGame = false ;
 
-    constructor(mission, timeEnd, road, curve, common){
-        this.mission = mission;
+    constructor(time, heureux, nbFails, timeEnd, road, curve, common){
+        this.mission = 'Vous avez ' + time + ' secondes pour que ' + heureux + ' conducteurs rejoignent la fin du niveau avec une marge de ' + nbFails + ' erreurs !';
         this.timeEnd = timeEnd;
         this.road = road;
         this.curve = curve;
@@ -41,6 +41,10 @@ class Game {
         if (parseFloat(this.chrono) >= this.timeEnd) {
             this.endGame = true ;
             this.stop();
-          }
+        }
+
+        if (this.errors >= this.nbFails){
+            //
+        }
     }
 }
