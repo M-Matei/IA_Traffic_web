@@ -1,0 +1,7 @@
+#scrollable-div {
+    height: 150px; /* Hauteur fixe de la div */
+    border: 1px solid #000; /* Bordure pour visualiser la div */
+    overflow-y: scroll; /* Activer le défilement vertical */
+    overflow-x: hidden; /* Désactiver le défilement horizontal */
+    padding-left: 15px;
+}

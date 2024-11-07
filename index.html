@@ -15,10 +15,13 @@
     import { Feu } from './feu.js';
     import { Vehicule } from './vehicule.js';
   </script>
+
   <script src="script.js"></script>
+  <link rel="stylesheet" href="style.css"></script>
+
 </head>
 <body>
-  <div x-data="app()" x-init="init()">
+  <div x-data="app()">
     <canvas id="canvas" width="800" height="400" style="border: 1px solid black;"></canvas>
   
     <br><br>
@@ -83,19 +86,22 @@
       -->
 
     </fieldset> 
-
-    
-
     <br><fieldset>
       <legend><b>Général</b></legend>
       <label><b x-text="'Objectif principal : ' + mission"></b></label>
-      <br><label>Temps écoulé : </label><b><span x-text="chrono"></span></b><label> seconde(s) / 40sec. = Game over</label>
+      <br><br><label>Temps écoulé : </label><b><span x-text="chrono"></span></b><label x-text="' seconde(s) / ' + time + 'sec. = Game over'"></label>
 
-      <br><br><label>Dernier message important : </label><b><span x-text="consoleLog"></span></b>
+      <br><label>Dernier message important : </label><b><span x-text="consoleLog"></span></b>
+      
+      <br><br><label><b>
+        Historique des modifications apportées au paramétrage de la simulation
+      </b></label>
+      <div id="scrollable-div"></div>
+
       <br><label>Distance de déplacement maximale des véhicules en 1 unité de temps</label>
       <input type="range" x-model.number="speed" min="0" max="0.5" step="0.05">
-      <br><label>Score : </label><b><span x-text="score"></span></b>
-      <br><label>Nombre d'erreur(s) </label><b><span x-text="errors"></span></b><label>/4 avant la défaite</label>
+      <br><label>Score : </label><b><span x-text="score + '/' + heureux"></span></b>
+      <br><label>Nombre d'erreur(s) </label><b><span x-text="errors"></span></b><label x-text="'/' + nbFails + ' avant la défaite'"></label>
 
     </fieldset>
 
@@ -103,8 +109,8 @@
 
     <br><fieldset x-show='infosFeu'>
       <legend>Gestion du feu</legend>
-      <button @click="feu.userClick('doubleClick') ; drawPoint(feu.positionCoords(0)[0], feu.positionCoords(0)[1], 7, feu.state)">Rouge &#8594; Vert</button><br>
-      <button @click="feu.userClick('simpleClick') ; drawPoint(feu.positionCoords(0)[0], feu.positionCoords(0)[1], 7, feu.state);">Vert &#8594; Rouge | Jaune &#8594; Rouge | Rouge &#8594; Jaune</button><br>
+      <button @click="feu.userClick('doubleClick')">Rouge &#8594; Vert</button><br>
+      <button @click="feu.userClick('simpleClick')">Vert &#8594; Rouge | Jaune &#8594; Rouge | Rouge &#8594; Jaune</button><br>
 
       <br><label>Nombre de véhicules arrêtés au feu : </label><b><span x-text="trafficJam"></span></b>
 
@@ -117,29 +123,23 @@
     
     <br><b>Paramètrage de chaque véhicule indépendamment</b>
     
-    <fieldset x-show="infosCar1">
-      <legend><b>Comportement du véhicule du joueur</b></legend>
-      <b>Premier véhicule</b><br>
-      <label>Capacité à attendre à un feu avant de devenir 'Furieux' (-1)</label>
-      <select x-model="mood">
-        <option>Grande</option>
-        <option>Moyenne</option>
-        <option>Très faible</option>
-      </select>
+    <template x-for="(car, index) in cars" :key="index">
+      <fieldset x-show="'infosCar' + (index+1)">
+        <legend><b>Comportement du véhicule du joueur</b></legend>
+        <b x-text="'Véhicule n° ' + (index+1)"></b><br>
+        <label>Capacité à attendre à un feu avant de devenir 'Furieux' (-1)</label>
+        <select x-model="'mood' + (index+1)">
+          <option>Grande</option>
+          <option>Moyenne</option>
+          <option>Très faible</option>
+        </select>
+  
+        <br><label>Votre conducteur est actuellement : </label><b><span x-text="'stateCar' + (index+1)"></span></b>
+        
+      </fieldset>
+    </template>
 
-      <br><label>Votre conducteur est actuellement : </label><b><span x-text="stateCar"></span></b>
-      
-      <!-- <br><br><b>Second véhicule</b><br>
-      <label>Capacité à attendre à un feu avant de devenir 'Furieux' (-1)</label>
-      <select x-model="mood2">
-        <option>Énervé</option>
-        <option>Fatigué</option>
-        <option>Calme</option>
-      </select>
-
-      <br><label>Votre conducteur est actuellement : </label><b><span x-text="stateCar2"></span></b> -->
-      
-    </fieldset>
+    
     
   </div>
 </body>

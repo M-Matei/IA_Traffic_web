@@ -2,35 +2,38 @@ function app() {
 
     return {
 
-      game : null, // Object Game
-      canvas: null,
-      ctx: null,   // contexte canvas
-
-      road: null, // voie des bots
-      curve: null, // voie des véhicules-joueur
-      common:null, // voie commune
-      speed : 0.5,
-
+      // Object Game
+      game : null,
       time: null,
       heureux: null,
       nbFails: null,
       mission:null,
 
       consoleLog: '', // message
+      debugLog: '',
       chrono: 0,
       score: 0,
       errors: 0,
 
+      road: null, // voie des bots
+      curve: null, // voie des véhicules-joueur
+      common:null, // voie commune
+
       endGame:false, // game over
+      
+      // ---------------------------------------------------
+
+      canvas: null,
+      ctx: null,   // contexte canvas
+
+      speed : 0.5,
 
       feu: null,
       infosFeu: false,
       trafficJam: 0,
       acurate: 'Nulle',
 
-      // infosCar1 : false,
-      // mood : 'Grande',
-      // stateCar: 'Neutre',
+      cars : [],
 
       // // déplacement en temps réel de manière fluide
       // lastTimestamp:0,
@@ -87,7 +90,8 @@ function app() {
 
         let coordsFeu = this.feu.positionCoords(0);
         this.drawPoint(coordsFeu[0], coordsFeu[1], 7, this.feu.state);
-        
+
+        this.addObserver('feu.state');
       },
 
       
@@ -128,6 +132,33 @@ function app() {
         return new Promise(resolve => setTimeout(resolve, ms));
       },
 
+      history(action) {
+          var newAction = document.createElement('p');
+          newAction.textContent = action;
+      
+          // Sélectionner l'élément parent où insérer le paragraphe
+          var parent = document.querySelector('#scrollable-div');
+      
+          if (parent) {
+            parent.appendChild(newAction);
+            parent.scrollTop = parent.scrollHeight - parent.clientHeight;
+          }
+        
+      },
+      
+
+      addObserver(propertyName) {
+        this.$watch(propertyName, (value, oldValue) => {
+          console.log('bug 0');
+            switch(propertyName){
+              case 'feu.state': 
+                this.drawPoint(this.feu.positionCoords(0)[0], this.feu.positionCoords(0)[1], 7, this.feu.state);
+                this.history('La couleur du feu a été mise à jour : de ' + oldValue + ' à ' + value);
+                break;
+            }
+        });
+      },
+
       // déplacement en temps réel de manière fluide
       // tick(timestamp) {
       //   if (!this.lastTimestamp) this.lastTimestamp = timestamp;
@@ -142,6 +173,7 @@ function app() {
 
       async animate() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
         this.drawCurve(this.curve);
         this.drawCurve(this.commun);
         this.drawCurve(this.road);
@@ -160,6 +192,11 @@ function app() {
         car1.waiting(car1.mood, car1.waitTime);
         car1.colored(car1.stateCar);
         this.drawPoint(car1.x, car1.y, 5, car1.colorCar);
+
+        // infosCar1 : false,
+        // mood : 'Grande',
+        // stateCar: 'Neutre',
+
         */
 
         await this.wait(400);
