@@ -1,13 +1,14 @@
 export class Game {
     
+    intervalID = null;
     chrono = 0;
     errors = 0;
     score = 0;
     consoleLog = '';
     endGame = false ;
 
-    constructor(time, heureux, nbFails, timeEnd, road, curve, common){
-        this.mission = 'Vous avez ' + time + ' secondes pour que ' + heureux + ' conducteurs rejoignent la fin du niveau avec une marge de ' + nbFails + ' erreurs !';
+    constructor(heureux, nbFails, timeEnd, road, curve, common){
+        this.mission = 'Vous avez ' + timeEnd + ' secondes pour que ' + heureux + ' conducteurs rejoignent la fin du niveau avec une marge de ' + nbFails + ' erreurs !';
         this.timeEnd = timeEnd;
         this.road = road;
         this.curve = curve;
@@ -34,17 +35,13 @@ export class Game {
     updateElapsedTime() {
         const currentTime = Date.now();
         this.chrono = Math.floor((currentTime - this.startTime) / 1000);
-        this.game.isEndOfGame(this.chrono);
+        this.isEndOfGame(this.chrono);
     }
 
     isEndOfGame(){
-        if (parseFloat(this.chrono) >= this.timeEnd) {
+        if (parseFloat(this.chrono) >= this.timeEnd || this.errors >= this.nbFails) {
             this.endGame = true ;
-            this.stop();
         }
-
-        if (this.errors >= this.nbFails){
-            //
-        }
+        return this.endGame ;
     }
 }

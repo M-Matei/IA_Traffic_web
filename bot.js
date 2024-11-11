@@ -4,7 +4,6 @@ export class Bot {
     diameter = null ; // 6 or 9
 
     state  = 'neutre'; // or 'accidente'
-    step = 0; // sur la courbe de Bézier actuelle
 
     x = null;
     y = null;
@@ -22,6 +21,9 @@ export class Bot {
         } else if (type === 'Camion') {
             this.diameter = 9 ;
         }
+
+        this.positionCoords(0);
+
     }
 
     positionCoords(step){
@@ -32,10 +34,8 @@ export class Bot {
         return [this.x, this.y];
     }
 
-    /*
-    if (distanceBot.length() >= 30 ) {
+    drive(){
         this.stepBot += this.speed/2;
     }
-    */
 
 }

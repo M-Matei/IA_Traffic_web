@@ -25,7 +25,7 @@
     <canvas id="canvas" width="800" height="400" style="border: 1px solid black;"></canvas>
   
     <br><br>
-    <button @click="animate()">Démarrer la simulation</button><br>
+    <button @click="">Démarrer la simulation</button><br>
     <aside>Relancer la simulation ou réactualiser la page pour appliquer les changements de paramétrage marqué *</aside>
     <aside>Tous les autres paramètres sont modifiés en  temps réel</aside>
     
@@ -89,7 +89,7 @@
     <br><fieldset>
       <legend><b>Général</b></legend>
       <label><b x-text="'Objectif principal : ' + mission"></b></label>
-      <br><br><label>Temps écoulé : </label><b><span x-text="chrono"></span></b><label x-text="' seconde(s) / ' + time + 'sec. = Game over'"></label>
+      <br><br><label>Temps écoulé : </label><b><span x-text="chrono">0</span></b><label x-text="' seconde(s) / ' + time + 'sec. = Game over'">0</label>
 
       <br><label>Dernier message important : </label><b><span x-text="consoleLog"></span></b>
       

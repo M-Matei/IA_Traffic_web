@@ -9,6 +9,8 @@ function app() {
       nbFails: null,
       mission:null,
 
+      intervalBots: null,
+
       consoleLog: '', // message
       debugLog: '',
       chrono: 0,
@@ -34,6 +36,8 @@ function app() {
       acurate: 'Nulle',
 
       cars : [],
+      bots : [],
+      indexBots : 0,
 
       // // déplacement en temps réel de manière fluide
       // lastTimestamp:0,
@@ -74,9 +78,11 @@ function app() {
         this.time = 40;
         this.heureux = 2;
         this.nbFails = 4;
-        this.game = new Game(this.time, this.heureux, this.nbFails, this.road, this.curve, this.commun);
-
+        this.game = new Game(this.heureux, this.nbFails, this.time, this.road, this.curve, this.commun);
         this.mission = this.game.mission ;
+        this.game.start();
+
+        this.chrono = this.game.chrono ;
 
         this.drawCurve(this.curve);
         this.drawCurve(this.commun);
@@ -92,6 +98,10 @@ function app() {
         this.drawPoint(coordsFeu[0], coordsFeu[1], 7, this.feu.state);
 
         this.addObserver('feu.state');
+
+        // this.appearBot();
+
+        this.animate();
       },
 
       
@@ -149,12 +159,17 @@ function app() {
 
       addObserver(propertyName) {
         this.$watch(propertyName, (value, oldValue) => {
-          console.log('bug 0');
             switch(propertyName){
               case 'feu.state': 
                 this.drawPoint(this.feu.positionCoords(0)[0], this.feu.positionCoords(0)[1], 7, this.feu.state);
-                this.history('La couleur du feu a été mise à jour : de ' + oldValue + ' à ' + value);
+                this.history('feu.state : ' + oldValue + ' => ' + value);
                 break;
+            }
+
+            switch (true) {
+              case (/^bots\[\d+\]\.step$/.test(propertyName)) : 
+                console.log('a');
+                break ;
             }
         });
       },
@@ -171,6 +186,19 @@ function app() {
       //   if (!this.endGame) requestAnimationFrame((timestamp) => this.tick(timestamp));
       // },
 
+      async appearBot(){        
+        const botModule = await import('/bot.js')
+        const Bot = botModule.Bot ;
+        
+        let botPoint = new Bot(0.5, this.road, 'Voiture', this.speed);
+        this.bots.push(botPoint);
+
+        this.addObserver(`bots[${this.indexBots}].step`);
+        this.indexBots++;
+
+        this.drawPoint(botPoint.positionCoords(0)[0], botPoint.positionCoords(0)[1], 5);
+      },
+
       async animate() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -178,38 +206,26 @@ function app() {
         this.drawCurve(this.commun);
         this.drawCurve(this.road);
 
-        /*
-        let botPoint = new Bot(0.5, this.road, 'Voiture', this.speed);
-        let coords = botPoint.positionCoords();
-        this.drawPoint(coords[0], coords[1], 5);
-        */
-      
-        /*
-        // 1ère voiture
-        let car1 = new Vehicule(0.5, this.mood, this.curve, 'Voiture', this.speed);
-        this.infosCar1 = true ;
+        this.drawPoint(this.feu.positionCoords(0)[0], this.feu.positionCoords(0)[1], 7, this.feu.state);
+
+        this.chrono = this.game.chrono ;
+
+        // this.bots.forEach((bot) => {
+        //   bot.drive();
+        //   this.drawPoint(bot.positionCoords(bot.step), bot.positionCoords(bot.step)[1], 5);
+        // });
         
-        car1.waiting(car1.mood, car1.waitTime);
-        car1.colored(car1.stateCar);
-        this.drawPoint(car1.x, car1.y, 5, car1.colorCar);
-
-        // infosCar1 : false,
-        // mood : 'Grande',
-        // stateCar: 'Neutre',
-
-        */
-
-        await this.wait(400);
-
-        
+        this.endGame = this.game.isEndOfGame();
         if (!this.endGame) {
           requestAnimationFrame(() => this.animate());
-        } else if (this.endGame && this.score < 1) {
-          this.consoleLog = 'Fin de la partie : défaite!';
-          this.stop();
-        } else if (this.endGame && this.score !== 0) {
-          this.consoleLog = 'Fin de la partie : victoire!';
-          this.stop();
+        } else if (this.endGame && this.score < this.heureux) {
+          this.consoleLog = 'Fin de la partie : défaite !';
+          clearInterval(this.intervalBots);
+          this.game.stop();
+        } else if (this.endGame && this.score >= this.heureux) {
+          this.consoleLog = 'Fin de la partie : victoire !';
+          clearInterval(this.intervalBots);
+          this.game.stop();
         }
         
       }
