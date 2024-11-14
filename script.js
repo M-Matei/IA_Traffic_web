@@ -9,8 +9,6 @@ function app() {
       nbFails: null,
       mission:null,
 
-      intervalBots: null,
-
       consoleLog: '', // message
       debugLog: '',
       chrono: 0,
@@ -19,9 +17,11 @@ function app() {
 
       road: null, // voie des bots
       curve: null, // voie des véhicules-joueur
-      common:null, // voie commune
 
       endGame:false, // game over
+
+      intervalBots: null,
+      intervalCars: null,
       
       // ---------------------------------------------------
 
@@ -69,29 +69,26 @@ function app() {
         this.ctx = this.canvas.getContext('2d');
 
         // voie véhicule joueur
-        this.curve = new Bezier(200, 370, 200, 150, 500, 150);
+        this.curve = new Bezier(200, 370, 200, 150, 700, 150);
         // voie véhicule non-joueur
-        this.road = new Bezier(80, 150, 500, 150, 500, 150);
-        // voie commune en fin de niveau
-        this.commun = new Bezier(500, 150, 500, 150, 700, 150);
+        this.road = new Bezier(45, 150, 500, 150, 770, 150);
 
         this.time = 40;
         this.heureux = 2;
         this.nbFails = 4;
-        this.game = new Game(this.heureux, this.nbFails, this.time, this.road, this.curve, this.commun);
+        this.game = new Game(this.heureux, this.nbFails, this.time, this.road, this.curve);
         this.mission = this.game.mission ;
         this.game.start();
 
         this.chrono = this.game.chrono ;
 
         this.drawCurve(this.curve);
-        this.drawCurve(this.commun);
         this.drawCurve(this.road);
 
         const feuModule = await import('/feu.js')
         const Feu = feuModule.Feu ;
 
-        this.feu = new Feu(this.acurate, this.curve, 0.8, false);
+        this.feu = new Feu(this.acurate, this.curve, 0.75, false);
         this.infosFeu = true ;
 
         let coordsFeu = this.feu.positionCoords(0);
@@ -99,7 +96,15 @@ function app() {
 
         this.addObserver('feu.state');
 
-        // this.appearBot();
+        this.appearBot();
+        this.intervalBots = setInterval(() => {
+          this.appearBot();
+        }, 1.2 * 1000);
+
+        // this.appearCar();
+        // this.intervalCars = setInterval(() => {
+        //   this.appearCar();
+        // }, 4 * 1000);
 
         this.animate();
       },
@@ -126,8 +131,8 @@ function app() {
         for (let i = 1; i < points.length; i++) {
           this.ctx.lineTo(points[i].x, points[i].y);
         }
-        this.ctx.strokeStyle = "black";
-        this.ctx.lineWidth = 0.6;
+        this.ctx.strokeStyle = "white";
+        this.ctx.lineWidth = 10;
         this.ctx.stroke();
       },
      
@@ -165,12 +170,6 @@ function app() {
                 this.history('feu.state : ' + oldValue + ' => ' + value);
                 break;
             }
-
-            switch (true) {
-              case (/^bots\[\d+\]\.step$/.test(propertyName)) : 
-                console.log('a');
-                break ;
-            }
         });
       },
 
@@ -187,43 +186,47 @@ function app() {
       // },
 
       async appearBot(){        
-        const botModule = await import('/bot.js')
+        const botModule = await import('/bot.js');
         const Bot = botModule.Bot ;
         
-        let botPoint = new Bot(0.5, this.road, 'Voiture', this.speed);
+        let botPoint = new Bot(0, 0.5, this.road, 'Voiture', this.speed);
         this.bots.push(botPoint);
-
-        this.addObserver(`bots[${this.indexBots}].step`);
-        this.indexBots++;
-
-        this.drawPoint(botPoint.positionCoords(0)[0], botPoint.positionCoords(0)[1], 5);
       },
 
       async animate() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.drawCurve(this.curve);
-        this.drawCurve(this.commun);
         this.drawCurve(this.road);
 
-        this.drawPoint(this.feu.positionCoords(0)[0], this.feu.positionCoords(0)[1], 7, this.feu.state);
+        this.drawPoint(this.feu.positionCoords()[0], this.feu.positionCoords()[1], 7, this.feu.state);
 
         this.chrono = this.game.chrono ;
 
-        // this.bots.forEach((bot) => {
-        //   bot.drive();
-        //   this.drawPoint(bot.positionCoords(bot.step), bot.positionCoords(bot.step)[1], 5);
-        // });
+        this.bots.forEach((bot) => {
+          let coordsBot = bot.drive();
+          if (coordsBot !== -1) {
+            this.drawPoint(coordsBot[0], coordsBot[1], 4.5);
+          } else {
+            const index = this.bots.indexOf(bot);
+            if (index !== -1) {
+              this.bots.splice(index, 1);
+            }
+          }
+          
+        });
         
         this.endGame = this.game.isEndOfGame();
         if (!this.endGame) {
           requestAnimationFrame(() => this.animate());
         } else if (this.endGame && this.score < this.heureux) {
           this.consoleLog = 'Fin de la partie : défaite !';
+          this.history('endGame : false => true');
           clearInterval(this.intervalBots);
           this.game.stop();
         } else if (this.endGame && this.score >= this.heureux) {
           this.consoleLog = 'Fin de la partie : victoire !';
+          this.history('endGame : false => true');
           clearInterval(this.intervalBots);
           this.game.stop();
         }

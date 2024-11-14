@@ -7,12 +7,11 @@ export class Game {
     consoleLog = '';
     endGame = false ;
 
-    constructor(heureux, nbFails, timeEnd, road, curve, common){
+    constructor(heureux, nbFails, timeEnd, road, curve){
         this.mission = 'Vous avez ' + timeEnd + ' secondes pour que ' + heureux + ' conducteurs rejoignent la fin du niveau avec une marge de ' + nbFails + ' erreurs !';
         this.timeEnd = timeEnd;
         this.road = road;
         this.curve = curve;
-        this.common = common;
     }
 
     start() {

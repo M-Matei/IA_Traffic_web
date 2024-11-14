@@ -22,10 +22,10 @@
 </head>
 <body>
   <div x-data="app()">
-    <canvas id="canvas" width="800" height="400" style="border: 1px solid black;"></canvas>
+    <canvas id="canvas" width="800" height="400" style="border: none"></canvas>
   
     <br><br>
-    <button @click="">Démarrer la simulation</button><br>
+    <button @click="">Démarrer la simulation</button> <button @click="endGame = true">Arrêt</button><br><br>
     <aside>Relancer la simulation ou réactualiser la page pour appliquer les changements de paramétrage marqué *</aside>
     <aside>Tous les autres paramètres sont modifiés en  temps réel</aside>
     

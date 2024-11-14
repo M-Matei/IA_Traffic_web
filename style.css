@@ -5,3 +5,7 @@
     overflow-x: hidden; /* Désactiver le défilement horizontal */
     padding-left: 15px;
 }
+
+#canvas {
+    background-color: lightgray;
+}

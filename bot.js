@@ -9,7 +9,8 @@ export class Bot {
     y = null;
     speed_max = null;
     
-    constructor(speed, curve, type, speed_max){
+    constructor(step, speed, curve, type, speed_max){
+        this.step = step ;
         this.speed = speed;
         this.speed_max = speed_max;
 
@@ -22,12 +23,10 @@ export class Bot {
             this.diameter = 9 ;
         }
 
-        this.positionCoords(0);
-
+        this.positionCoords();
     }
 
-    positionCoords(step){
-        this.step = step ;
+    positionCoords(){
         let coord = this.curve.get(this.step);
         this.x = coord.x ;
         this.y = coord.y ;
@@ -35,7 +34,11 @@ export class Bot {
     }
 
     drive(){
-        this.stepBot += this.speed/2;
+        if (this.step < 1) {
+            this.step += this.speed/100;
+            return this.positionCoords();
+        } else {
+            return -1;
+        }
     }
-
 }
