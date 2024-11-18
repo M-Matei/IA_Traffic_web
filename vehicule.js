@@ -4,22 +4,20 @@ export class Vehicule {
     diameter = null ; // 6 or 9
 
     state  = 'Neutre'; // 'impatient' or 'furieux' or 'heureux' or 'accidente'
-    position = 0; // sur la courbe de Bézier actuelle
 
     waitTime = 0;
 
     x = null;
     y = null;
-    speed_max = null;
-
 
     step = 0 ; // position du véhicule sur la courbe actuelle
     stateCar = 'Neutre';  // État du conducteur
     colorCar = null; // Couleur en fonction de l'état du conducteur
+    passFeu = false;
 
-    constructor(speed, mood, curve, type, speed_max){
+    constructor(speed, mood, curve, type){
+
         this.speed = speed;
-        this.speed_max = speed_max;
 
         this.mood = mood;
         this.curve = curve;
@@ -30,10 +28,12 @@ export class Vehicule {
         } else if (type === 'Camion') {
             this.diameter = 9 ;
         }
+        
+        this.positionCoords();
     }
 
     positionCoords(){
-        let coord = this.curve.get(this.position);
+        let coord = this.curve.get(this.step);
         this.x = coord.x ;
         this.y = coord.y ;
         return [this.x, this.y];
@@ -67,71 +67,55 @@ export class Vehicule {
     }
 
     // changement de couleur du véhicule en fonction de son état
-    colored(state){
-        switch(state){
+    colored(){
+        switch(this.state){
           case 'Neutre':
-            this.colorCar = 'blue';
-            break;
+            return this.colorCar = 'blue';
           case 'Impatient':
-            this.colorCar = "pink";
-            break;
+            return this.colorCar = "pink";
           case 'Furieux':
-            this.colorCar = "magenta";
-            break;
+            return this.colorCar = "magenta";
           case 'Heureux':
-            this.colorCar = "darkgreen";
-            break;
+            return this.colorCar = "darkgreen";
           case "Accident":
-            this.colorCar = "orange";
-            break;
+            return this.colorCar = "orange";
         }
     }
 
     speedVariation(game, feu){
 
       let speedCalculted = false ;
+      let consoleLog = '';
 
       // vitesse en fonction de la distance qui sépare du prochain feu
-      const distancetoFeu = this.curve.split(this.step, feu.step);
+      const distancetoFeu = this.curve.split(this.step, feu.position).length() ;
       // fin de la courbe de Bézier = voie des véhicules-joueur
-      const distance = this.curve.split(this.step, 1);
+      const distance = this.curve.split(this.step, 1).length() ;
 
-      if (distancetoFeu.length() <= 100 && this.step < feu.step - 10 ) {
-        this.step += this.speed * (distance.length() / 100);
-        game.consoleLog = 'Feu dans le champ de vision du conducteur !';
+      if (distancetoFeu <= 100 && this.step < feu.position - 10 ) {
+        this.step += this.speed * (distance / 100);
+        consoleLog += ' Feu dans le champ de vision du conducteur !';
         speedCalculted = true ;
       }
 
       // vitesse en fonction de l'état du prochain feu (rouge, vert/jaune)
       
       // arrêt du véhicule au feu rouge
-      if (distancetoFeu.length() <= 20 && feu.color === 'red') {
+      if (distancetoFeu < 20 && feu.state === 'red' && this.step <= 0.74) {
         this.step += 0 ;
         this.waitTime++;
-        game.consoleLog = 'Votre véhicule est arrêté au feu, son conducteur patiente !';
+        game.
+        consoleLog += ' Votre véhicule est arrêté au feu, son conducteur patiente !';
         feu.trafficJam = 1 ;
         speedCalculted = true ;
-      }
-
-      // redémarrage après un arrêt au feu
-      if (feu.color !== 'red' && distancetoFeu.length() <= 20) {
-        this.speed = 0.05 ;
+      } else if (this.step > 0.76){
+        this.speed = 0.5/100 ;
         this.step += this.speed;          
         this.waitTime = 0 ;
         feu.trafficJam = 0 ;
-        feu.carsPassed++;
-        game.consoleLog = 'Le véhicule a traversé le feu';
+        this.passFeu ;
+        consoleLog += ' Le véhicule a traversé le feu';
         speedCalculted = true ;
-      } else if (feu.color === 'yellow' && feu.acurate === 'Nulle') {
-          if (feu.carsPassed === 1){
-            feu.color = 'red';
-          }
-      } else if (feu.color === 'yellow' && feu.acurate === 'Aléatoire') {
-          if (feu.carsPassed === 1 && (Math.random() < 0.5)){
-            feu.color = 'yellow';
-          } else if (feu.carsPassed === 2){
-            feu.color = 'red';
-          }
       }
 
       // vitesse en fonction de la pente de la trajectoire
@@ -147,20 +131,28 @@ export class Vehicule {
         (Math.abs(slope) > Math.tan(7 * Math.PI / 6) && Math.abs(slope) < Math.tan(4 * Math.PI / 3)) ||
         (Math.abs(slope) > Math.tan(5 * Math.PI / 3) && Math.abs(slope) < Math.tan(11 * Math.PI / 6))
       ) {
-        this.step -= this.speed * 0.6;
-        this.consoleLog = "Correction de la vitesse, trajectoire dangeureuse !";
+        // Calcul de la pondération en fonction de l'éloignement de l'angle idéal
+        let angleDeviation = Math.abs(Math.atan(slope)); // Convertit la pente en angle
+        let maxDeviation = Math.PI / 1.2; // L'angle critique maximal
+        let penaltyFactor = Math.max(0, 1 - angleDeviation / maxDeviation); // Pondération proportionnelle
+
+        this.step += this.speed * penaltyFactor; // Ajuste la vitesse proportionnellement
+        consoleLog += " Correction de la vitesse, trajectoire dangeureuse !";
         speedCalculted = true ;
       }
 
     // avancer de 1 unité de temps selon la vitesse
-    if (distance.length() >= 10 && !speedCalculted) {
-      this.step += this.speed;
+    if (distance > 10 && !speedCalculted) {
+      this.step += 0.5/100 ;
     }
     
-    if (distance.length() < 10 ){
+    if (distance < 10 ){
       game.score = 1 ;
-      game.consoleLog = '+1 : Conducteur heureux !';
-    }    
+      consoleLog += ' +1 : Conducteur heureux !';
+      return [-1, consoleLog];
+    } 
+    
+    return [this.positionCoords(), consoleLog];
   }
 
   checkCollisions(arrayBots){

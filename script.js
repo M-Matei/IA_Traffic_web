@@ -37,7 +37,6 @@ function app() {
 
       cars : [],
       bots : [],
-      indexBots : 0,
 
       // // déplacement en temps réel de manière fluide
       // lastTimestamp:0,
@@ -101,7 +100,7 @@ function app() {
           this.appearBot();
         }, 1.2 * 1000);
 
-        // this.appearCar();
+        this.appearCar();
         // this.intervalCars = setInterval(() => {
         //   this.appearCar();
         // }, 4 * 1000);
@@ -160,7 +159,6 @@ function app() {
           }
         
       },
-      
 
       addObserver(propertyName) {
         this.$watch(propertyName, (value, oldValue) => {
@@ -189,8 +187,16 @@ function app() {
         const botModule = await import('/bot.js');
         const Bot = botModule.Bot ;
         
-        let botPoint = new Bot(0, 0.5, this.road, 'Voiture', this.speed);
+        let botPoint = new Bot(0.5, this.road, 'Voiture');
         this.bots.push(botPoint);
+      },
+
+      async appearCar(){        
+        const carModule = await import('/vehicule.js');
+        const Vehicule = carModule.Vehicule ;
+        
+        let vehicule = new Vehicule(1/200, 'Calme', this.curve, 'Voiture');
+        this.cars.push(vehicule);
       },
 
       async animate() {
@@ -198,8 +204,6 @@ function app() {
 
         this.drawCurve(this.curve);
         this.drawCurve(this.road);
-
-        this.drawPoint(this.feu.positionCoords()[0], this.feu.positionCoords()[1], 7, this.feu.state);
 
         this.chrono = this.game.chrono ;
 
@@ -213,10 +217,26 @@ function app() {
               this.bots.splice(index, 1);
             }
           }
-          
         });
-        
-        this.endGame = this.game.isEndOfGame();
+
+        this.cars.forEach((car) => {
+          let infosCar = car.speedVariation(this.game, this.feu);
+          if (infosCar[0] !== -1) {
+            this.drawPoint(infosCar[0][0], infosCar[0][1], 4.5, car.colored());
+          } else {
+            const index = this.cars.indexOf(car);
+            if (index !== -1) {
+              this.cars.splice(index, 1);
+            }
+          }
+          this.consoleLog = infosCar[1];
+
+          if (car.step > 0.76 && this.feu.state === 'yellow') this.feu.state = 'red';
+      });
+
+        this.drawPoint(this.feu.positionCoords()[0], this.feu.positionCoords()[1], 7, this.feu.state);
+
+        // this.endGame = this.game.isEndOfGame();
         if (!this.endGame) {
           requestAnimationFrame(() => this.animate());
         } else if (this.endGame && this.score < this.heureux) {

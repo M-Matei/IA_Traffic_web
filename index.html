@@ -23,9 +23,66 @@
 <body>
   <div x-data="app()">
     <canvas id="canvas" width="800" height="400" style="border: none"></canvas>
+
+    <button @click="endGame = true">Arrêt</button>
+    
+    </fieldset> 
+    <br><fieldset>
+      <legend><b>Général</b></legend>
+      <label><b x-text="'Objectif principal : ' + mission"></b></label>
+      <br><br><label>Temps écoulé : </label><b><span x-text="chrono">0</span></b><label x-text="' seconde(s) / ' + time + 'sec. = Game over'">0</label>
+
+      <br><label>Dernier message important : </label><b><span x-text="consoleLog"></span></b>
+      
+      <br><br><label><b>
+        Historique des modifications apportées au paramétrage de la simulation
+      </b></label>
+      <div id="scrollable-div"></div>
+
+      <br><label>Distance de déplacement maximale des véhicules en 1 unité de temps</label>
+      <input type="range" x-model.number="speed" min="0" max="0.5" step="0.05">
+      <br><label>Score : </label><b><span x-text="score + '/' + heureux"></span></b>
+      <br><label>Nombre d'erreur(s) </label><b><span x-text="errors"></span></b><label x-text="'/' + nbFails + ' avant la défaite'"></label>
+
+    </fieldset>
+
+    <br><b>Interaction avec le feu de circulation</b>
+
+    <br><fieldset x-show='infosFeu'>
+      <legend>Gestion du feu</legend>
+      <button @click="feu.userClick('doubleClick')">Rouge &#8594; Vert</button><br>
+      <button @click="feu.userClick('simpleClick')">Vert &#8594; Rouge | Jaune &#8594; Rouge | Rouge &#8594; Jaune</button><br>
+
+      <br><label>Nombre de véhicules arrêtés au feu : </label><b><span x-text="trafficJam"></span></b>
+
+      <br><br><label>Imprécision du feu pour faire passer 2 véhicules au jaune</label>
+      <select x-model="acurate">
+        <option>Nulle</option>
+        <option>Aléatoire</option>
+      </select>
+    </fieldset>
+    
+    <br><b>Paramètrage de chaque véhicule indépendamment</b>
+    
+    <!-- <template x-for="(car, index) in cars" :key="index">
+      <fieldset x-show="'infosCar' + (index+1)">
+        <legend><b>Comportement du véhicule du joueur</b></legend>
+        <b x-text="'Véhicule n° ' + (index+1)"></b><br>
+        <label>Capacité à attendre à un feu avant de devenir 'Furieux' (-1)</label>
+        <select x-model="'mood' + (index+1)">
+          <option>Grande</option>
+          <option>Moyenne</option>
+          <option>Très faible</option>
+        </select>
   
+        <br><label>Votre conducteur est actuellement : </label><b><span x-text="'stateCar' + (index+1)"></span></b>
+        
+      </fieldset>
+    </template> -->
+
+
     <br><br>
-    <button @click="">Démarrer la simulation</button> <button @click="endGame = true">Arrêt</button><br><br>
+    <button @click="">Démarrer la simulation</button><br><br>
     <aside>Relancer la simulation ou réactualiser la page pour appliquer les changements de paramétrage marqué *</aside>
     <aside>Tous les autres paramètres sont modifiés en  temps réel</aside>
     
@@ -84,60 +141,6 @@
       <span>Abscisse</span><input type="number" id="xIntersection" x-model="xIntersection" min="20" max="widthCanvas-20">
       <br><span>Ordonnée</span><input type="number" id="yIntersection" x-model="yIntersection" min="20" max="heightCanvas-20">
       -->
-
-    </fieldset> 
-    <br><fieldset>
-      <legend><b>Général</b></legend>
-      <label><b x-text="'Objectif principal : ' + mission"></b></label>
-      <br><br><label>Temps écoulé : </label><b><span x-text="chrono">0</span></b><label x-text="' seconde(s) / ' + time + 'sec. = Game over'">0</label>
-
-      <br><label>Dernier message important : </label><b><span x-text="consoleLog"></span></b>
-      
-      <br><br><label><b>
-        Historique des modifications apportées au paramétrage de la simulation
-      </b></label>
-      <div id="scrollable-div"></div>
-
-      <br><label>Distance de déplacement maximale des véhicules en 1 unité de temps</label>
-      <input type="range" x-model.number="speed" min="0" max="0.5" step="0.05">
-      <br><label>Score : </label><b><span x-text="score + '/' + heureux"></span></b>
-      <br><label>Nombre d'erreur(s) </label><b><span x-text="errors"></span></b><label x-text="'/' + nbFails + ' avant la défaite'"></label>
-
-    </fieldset>
-
-    <br><b>Interaction avec le feu de circulation</b>
-
-    <br><fieldset x-show='infosFeu'>
-      <legend>Gestion du feu</legend>
-      <button @click="feu.userClick('doubleClick')">Rouge &#8594; Vert</button><br>
-      <button @click="feu.userClick('simpleClick')">Vert &#8594; Rouge | Jaune &#8594; Rouge | Rouge &#8594; Jaune</button><br>
-
-      <br><label>Nombre de véhicules arrêtés au feu : </label><b><span x-text="trafficJam"></span></b>
-
-      <br><br><label>Imprécision du feu pour faire passer 2 véhicules au jaune</label>
-      <select x-model="acurate">
-        <option>Nulle</option>
-        <option>Aléatoire</option>
-      </select>
-    </fieldset>
-    
-    <br><b>Paramètrage de chaque véhicule indépendamment</b>
-    
-    <template x-for="(car, index) in cars" :key="index">
-      <fieldset x-show="'infosCar' + (index+1)">
-        <legend><b>Comportement du véhicule du joueur</b></legend>
-        <b x-text="'Véhicule n° ' + (index+1)"></b><br>
-        <label>Capacité à attendre à un feu avant de devenir 'Furieux' (-1)</label>
-        <select x-model="'mood' + (index+1)">
-          <option>Grande</option>
-          <option>Moyenne</option>
-          <option>Très faible</option>
-        </select>
-  
-        <br><label>Votre conducteur est actuellement : </label><b><span x-text="'stateCar' + (index+1)"></span></b>
-        
-      </fieldset>
-    </template>
 
     
     

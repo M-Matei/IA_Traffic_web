@@ -5,14 +5,12 @@ export class Bot {
 
     state  = 'neutre'; // or 'accidente'
 
+    step = 0 ;
     x = null;
     y = null;
-    speed_max = null;
     
-    constructor(step, speed, curve, type, speed_max){
-        this.step = step ;
+    constructor(speed, curve, type){
         this.speed = speed;
-        this.speed_max = speed_max;
 
         this.curve = curve;
 
@@ -35,7 +33,7 @@ export class Bot {
 
     drive(){
         if (this.step < 1) {
-            this.step += this.speed/100;
+            this.step += 0.5/100;
             return this.positionCoords();
         } else {
             return -1;
