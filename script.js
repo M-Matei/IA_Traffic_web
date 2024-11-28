@@ -13,6 +13,7 @@ function app() {
       debugLog: '',
       chrono: 0,
       score: 0,
+      mood: 'Grande',
       errors: 0,
 
       road: null, // voie des bots
@@ -101,9 +102,9 @@ function app() {
         }, 1.2 * 1000);
 
         this.appearCar();
-        // this.intervalCars = setInterval(() => {
-        //   this.appearCar();
-        // }, 4 * 1000);
+        this.intervalCars = setInterval(() => {
+          this.appearCar();
+        }, 2 * 1000);
 
         this.animate();
       },
@@ -195,7 +196,7 @@ function app() {
         const carModule = await import('/vehicule.js');
         const Vehicule = carModule.Vehicule ;
         
-        let vehicule = new Vehicule(1/200, 'Calme', this.curve, 'Voiture');
+        let vehicule = new Vehicule(1/200, this.mood, this.curve, 'Voiture');
         this.cars.push(vehicule);
       },
 
@@ -219,15 +220,28 @@ function app() {
           }
         });
 
+        this.trafficJam = 0 ;
         this.cars.forEach((car) => {
-          let infosCar = car.speedVariation(this.game, this.feu);
+          const numero = this.cars.indexOf(car);
+          let vision = [-1, -1];
+          if (numero !== 0) {
+            vision = [this.cars[numero-1].lastVariation, this.cars[numero-1].step];
+          }
+          let infosCar = car.speedVariation(this.game, this.feu, vision);
           if (infosCar[0] !== -1) {
+            car.waiting(car.mood);
             this.drawPoint(infosCar[0][0], infosCar[0][1], 4.5, car.colored());
+            if (infosCar[2] === true) this.trafficJam++ ;
+            if (car.state === 'Furieux' && !car.furious) {
+              this.errors++ ;
+              car.furious = true;
+            } 
           } else {
-            const index = this.cars.indexOf(car);
-            if (index !== -1) {
-              this.cars.splice(index, 1);
-            }
+              if (!car.furious) this.score++ ;
+              const index = this.cars.indexOf(car);
+              if (index !== -1) {
+                this.cars.splice(index, 1);
+              }
           }
           this.consoleLog = infosCar[1];
 

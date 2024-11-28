@@ -11,9 +11,11 @@ export class Vehicule {
     y = null;
 
     step = 0 ; // position du véhicule sur la courbe actuelle
-    stateCar = 'Neutre';  // État du conducteur
-    colorCar = null; // Couleur en fonction de l'état du conducteur
     passFeu = false;
+    furious = false ;
+    arret = false ;
+
+    lastVariation = null;
 
     constructor(speed, mood, curve, type){
 
@@ -41,48 +43,46 @@ export class Vehicule {
 
     // Énervé <=> Fatigué <=> Calme
     // Le conducteur devient impatient 3 unités de temps avant de devenir furieux
-    waiting(mood, time){
+    waiting(mood){
       switch(mood){
-          case 'Énervé':
-          if(time > 5) {
-              this.stateCar = 'Furieux';
+          case 'Faible':
+          if(this.waitTime > 100) {
+              this.state = 'Furieux';
               this.consoleLog = '-1 : Conducteur furieux...';
-          } else if (time > 2) this.stateCar = 'Impatient';
+          } else if (this.waitTime > 40) this.state = 'Impatient';
           break;
-          case 'Fatigué':
-          if(time > 8) {
-              this.stateCar = 'Furieux';
+          case 'Moyenne':
+          if(this.waitTime > 160) {
+              this.state = 'Furieux';
               this.consoleLog = '-1 : Conducteur furieux...';
-          } else if (time > 5) this.stateCar = 'Impatient';
+          } else if (this.waitTime > 100) this.state = 'Impatient';
           break;
-          case 'Calme':
-          if (time > 12) {
-              this.stateCar = 'Furieux'; 
+          case 'Grande':
+          if (this.waitTime > 240) {
+              this.state = 'Furieux'; 
               this.consoleLog = '-1 : Conducteur furieux...';
-          } else if (time > 9) this.stateCar = 'Impatient';
+          } else if (this.waitTime > 90) this.state = 'Impatient';
           break;
       }
-
-      if (this.stateCar === 'Furieux') this.errors = 1 ;
     }
 
     // changement de couleur du véhicule en fonction de son état
     colored(){
         switch(this.state){
           case 'Neutre':
-            return this.colorCar = 'blue';
+            return 'blue';
           case 'Impatient':
-            return this.colorCar = "pink";
+            return 'pink';
           case 'Furieux':
-            return this.colorCar = "magenta";
+            return 'magenta';
           case 'Heureux':
-            return this.colorCar = "darkgreen";
-          case "Accident":
-            return this.colorCar = "orange";
+            return 'darkgreen';
+          case 'Accident':
+            return 'orange';
         }
     }
 
-    speedVariation(game, feu){
+    speedVariation(game, feu, vision){
 
       let speedCalculted = false ;
       let consoleLog = '';
@@ -93,26 +93,26 @@ export class Vehicule {
       const distance = this.curve.split(this.step, 1).length() ;
 
       if (distancetoFeu <= 100 && this.step < feu.position - 10 ) {
-        this.step += this.speed * (distance / 100);
+        this.lastVariation = this.speed * (distance / 100);
         consoleLog += ' Feu dans le champ de vision du conducteur !';
         speedCalculted = true ;
       }
 
       // vitesse en fonction de l'état du prochain feu (rouge, vert/jaune)
-      
       // arrêt du véhicule au feu rouge
       if (distancetoFeu < 20 && feu.state === 'red' && this.step <= 0.74) {
-        this.step += 0 ;
+        this.speed = 0 ;
+        this.lastVariation = 0 ;
         this.waitTime++;
+        this.arret = true ;
         game.
-        consoleLog += ' Votre véhicule est arrêté au feu, son conducteur patiente !';
+        consoleLog += ' Votre véhicule est arrêté, son conducteur patiente !';
         feu.trafficJam = 1 ;
         speedCalculted = true ;
       } else if (this.step > 0.76){
         this.speed = 0.5/100 ;
-        this.step += this.speed;          
-        this.waitTime = 0 ;
-        feu.trafficJam = 0 ;
+        this.lastVariation = this.speed;          
+        this.arret = false ;
         this.passFeu ;
         consoleLog += ' Le véhicule a traversé le feu';
         speedCalculted = true ;
@@ -136,23 +136,40 @@ export class Vehicule {
         let maxDeviation = Math.PI / 1.2; // L'angle critique maximal
         let penaltyFactor = Math.max(0, 1 - angleDeviation / maxDeviation); // Pondération proportionnelle
 
-        this.step += this.speed * penaltyFactor; // Ajuste la vitesse proportionnellement
+        this.lastVariation = this.speed * penaltyFactor; // Ajuste la vitesse proportionnellement
         consoleLog += " Correction de la vitesse, trajectoire dangeureuse !";
         speedCalculted = true ;
       }
 
     // avancer de 1 unité de temps selon la vitesse
     if (distance > 10 && !speedCalculted) {
-      this.step += 0.5/100 ;
+      this.lastVariation = 0.5/100 ;
+      speedCalculted = true ;
     }
-    
-    if (distance < 10 ){
+
+    // ajouter le déplacement pour évoluer sur la courbe en prenant en compte le véhicule de devant
+    let simulateStep = this.step + this.lastVariation ;
+    if (!(vision[0] === -1 && vision[1] === -1) && vision[1] - simulateStep <= 0.05) {
+      // proche d'un véhicule mais vitesse supérieur à la sienne = correction
+      if (this.lastVariation >= vision[0]) {
+        this.lastVariation = vision[0];
+        this.waitTime++ ;
+      }
+    }
+    // application définitive de l'évolution sur la courbe
+    this.step += this.lastVariation;
+
+    if (distance < 10){
       game.score = 1 ;
       consoleLog += ' +1 : Conducteur heureux !';
-      return [-1, consoleLog];
+      return [-1, consoleLog, this.arret];
     } 
     
-    return [this.positionCoords(), consoleLog];
+    if (this.lastVariation === 0){
+      this.arret = true ;
+    }
+    return [this.positionCoords(), consoleLog, this.arret];
+
   }
 
   checkCollisions(arrayBots){
