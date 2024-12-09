@@ -38,6 +38,7 @@ function app() {
 
       cars : [],
       bots : [],
+      accidents : [],
 
       // // déplacement en temps réel de manière fluide
       // lastTimestamp:0,
@@ -71,7 +72,7 @@ function app() {
         // voie véhicule joueur
         this.curve = new Bezier(200, 370, 200, 150, 700, 150);
         // voie véhicule non-joueur
-        this.road = new Bezier(45, 150, 500, 150, 770, 150);
+        this.road = new Bezier(45, 150, 500, 150, 700, 150);
 
         this.time = 40;
         this.heureux = 2;
@@ -161,6 +162,16 @@ function app() {
         
       },
 
+      clearAccidents(){
+        this.accidents.forEach((voiture) => {
+          const numero = this.accidents.indexOf(voiture);
+          if (numero !== -1) {
+            this.accidents.splice(numero, 1);
+          }
+        });
+        this.accidents.splice(0, this.accidents.length);
+      },
+
       addObserver(propertyName) {
         this.$watch(propertyName, (value, oldValue) => {
             switch(propertyName){
@@ -210,14 +221,21 @@ function app() {
 
         this.bots.forEach((bot) => {
           let coordsBot = bot.drive();
+          const index = this.bots.indexOf(bot);
           if (coordsBot !== -1) {
-            this.drawPoint(coordsBot[0], coordsBot[1], 4.5);
+            this.drawPoint(coordsBot[0], coordsBot[1], 4.5, bot.colored());
           } else {
-            const index = this.bots.indexOf(bot);
             if (index !== -1) {
               this.bots.splice(index, 1);
             }
           }
+
+          let collisionCar = bot.checkCollisions(this.accidents);
+            if (collisionCar !== -2){
+              this.bots[collisionCar].state = 'accidente';
+              this.accidents.push(this.bots[index].clone(this.bots[index].step));
+            }
+
         });
 
         this.trafficJam = 0 ;
@@ -231,19 +249,43 @@ function app() {
           if (infosCar[0] !== -1) {
             car.waiting(car.mood);
             this.drawPoint(infosCar[0][0], infosCar[0][1], 4.5, car.colored());
-            if (infosCar[2] === true) this.trafficJam++ ;
-            if (car.state === 'Furieux' && !car.furious) {
+            
+            let collisionCar = car.checkCollisions(this.bots, this.accidents);
+            if (collisionCar !== -2){
+              if (collisionCar === -1) {
+                this.accidents.push(car.clone(car.step));
+                if (numero !== -1) {
+                  this.cars.splice(numero, 1);
+                }
+              } else {
+                this.accidents.push(this.bots[collisionCar]);
+                this.bots[collisionCar].state = 'accidente';
+                this.accidents.push(car.clone(car.step));
+                this.accidents.push(this.bots[collisionCar].clone(this.bots[collisionCar].step));
+
+                if (numero !== -1) {
+                  this.cars.splice(numero, 1);
+                }
+                if (collisionCar !== -1) {
+                  this.bots.splice(collisionCar, 1);
+                }
+              }
+            }
+
+          } else {
+            if (!car.furious) this.score++ ;
+            if (numero !== -1) {
+              this.cars.splice(numero, 1);
+            }
+          }
+
+          if (infosCar[2] === true) this.trafficJam++ ;
+          if (car.state === 'Furieux' && !car.furious) {
               this.errors++ ;
               car.furious = true;
-            } 
-          } else {
-              if (!car.furious) this.score++ ;
-              const index = this.cars.indexOf(car);
-              if (index !== -1) {
-                this.cars.splice(index, 1);
-              }
           }
           this.consoleLog = infosCar[1];
+          console.log(this.accidents);
 
           if (car.step > 0.76 && this.feu.state === 'yellow') this.feu.state = 'red';
       });
@@ -251,17 +293,20 @@ function app() {
         this.drawPoint(this.feu.positionCoords()[0], this.feu.positionCoords()[1], 7, this.feu.state);
 
         // this.endGame = this.game.isEndOfGame();
+        if (this.trafficJam >= 15) this.endGame = true ;
         if (!this.endGame) {
           requestAnimationFrame(() => this.animate());
         } else if (this.endGame && this.score < this.heureux) {
           this.consoleLog = 'Fin de la partie : défaite !';
           this.history('endGame : false => true');
           clearInterval(this.intervalBots);
+          clearInterval(this.intervalCars);
           this.game.stop();
         } else if (this.endGame && this.score >= this.heureux) {
           this.consoleLog = 'Fin de la partie : victoire !';
           this.history('endGame : false => true');
           clearInterval(this.intervalBots);
+          clearInterval(this.intervalCars);
           this.game.stop();
         }
         

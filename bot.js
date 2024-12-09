@@ -32,11 +32,38 @@ export class Bot {
     }
 
     drive(){
+
+        if (this.state === 'accidente'){
+            return this.positionCoords();
+        }
+
         if (this.step < 1) {
             this.step += 0.5/100;
             return this.positionCoords();
         } else {
             return -1;
         }
+    }
+
+    // changement de couleur du véhicule en fonction de son état
+    colored(){
+        switch(this.state){
+          case 'neutre':
+            return 'gray';
+          case 'accidente':
+            return 'orange';
+        }
+    }
+
+    checkCollisions(accidents){
+        if (accidents.length !== 0) {
+          accidents.forEach((element) => {
+            if (Math.abs(this.x - element.x) <= 10 && Math.abs(this.y-element.y <= 10 )){
+              this.state = 'accidente';
+              return -1 ;
+            }
+          });
+        }
+        return -2 ;
     }
 }

@@ -15,10 +15,13 @@ export class Vehicule {
     furious = false ;
     arret = false ;
 
+    accidente = false ;
+
     lastVariation = null;
 
-    constructor(speed, mood, curve, type){
+    constructor(speed, mood, curve, type, position){
 
+      if (position === undefined) {
         this.speed = speed;
 
         this.mood = mood;
@@ -32,6 +35,26 @@ export class Vehicule {
         }
         
         this.positionCoords();
+
+      } else {
+
+        this.speed = speed;
+
+        this.mood = mood;
+        this.curve = curve;
+
+        this.type = type ;
+        if (type === 'Voiture') {
+            this.diameter = 6 ;
+        } else if (type === 'Camion') {
+            this.diameter = 9 ;
+        }
+
+        this.step = position ;
+        this.positionCoords();
+
+      }
+        
     }
 
     positionCoords(){
@@ -84,6 +107,8 @@ export class Vehicule {
 
     speedVariation(game, feu, vision){
 
+      if (this.accidente) return [this.positionCoords(), 'Véhicule accidenté sur la voie', false];
+
       let speedCalculted = false ;
       let consoleLog = '';
 
@@ -110,7 +135,7 @@ export class Vehicule {
         feu.trafficJam = 1 ;
         speedCalculted = true ;
       } else if (this.step > 0.76){
-        this.speed = 0.5/100 ;
+        this.speed = 0.5/140 ;
         this.lastVariation = this.speed;          
         this.arret = false ;
         this.passFeu ;
@@ -172,17 +197,31 @@ export class Vehicule {
 
   }
 
-  checkCollisions(arrayBots){
-    // if type of Both (vehicule-joueur && bot === 'Voiture')
+  clone(position){
+    return new Vehicule(this.speed, this.mood, this.curve, this.type, position);
+  }
+
+  checkCollisions(arrayBots, accidents){
+
+    if (accidents.length !== 0) {
+      accidents.forEach((element) => {
+        if (Math.abs(this.x - element.x) <= 10 && Math.abs(this.y-element.y <= 10 )){
+          this.state = 'Accident';
+          this.accidente = true ;
+          return -1 ;
+        }
+      });
+    }
+
     arrayBots.forEach((element) => {
-      if (Math.abs(this.x - element.x) <= 5 && Math.abs(this.y-element.y <= 5 )){
-        game.consoleLog = 'Collision!';
-        game.errors++;
-        game.score--;
-        // this.endGame = true;
-        this.colored('Accident');
-        //this.drawPoint(middlePoint.x, middlePoint.y, 5, this.colorCar);
+      if (Math.abs(this.x - element.x) <= 10 && Math.abs(this.y-element.y <= 10 )){
+        this.state = 'Accident';
+        this.accidente = true ;
+        const indexBot = arrayBots.indexOf(element);
+        return indexBot ;
       }
     });
+
+    return -2 ;
   }
 }
