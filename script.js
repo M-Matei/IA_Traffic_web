@@ -50,7 +50,7 @@ function app() {
           const module = await import('./dist/utils.js');
           const bezierModule = await import('./dist/bezier-3.js');
 
-          const gameModule = await import('/game.js')
+          const gameModule = await import('./game.js')
           const Game = gameModule.Game ;
           return { Game } ;
 
@@ -86,7 +86,7 @@ function app() {
         this.drawCurve(this.curve);
         this.drawCurve(this.road);
 
-        const feuModule = await import('/feu.js')
+        const feuModule = await import('./feu.js')
         const Feu = feuModule.Feu ;
 
         this.feu = new Feu(this.acurate, this.curve, 0.75, false);
@@ -163,13 +163,25 @@ function app() {
       },
 
       clearAccidents(){
-        this.accidents.forEach((voiture) => {
-          const numero = this.accidents.indexOf(voiture);
-          if (numero !== -1) {
-            this.accidents.splice(numero, 1);
+        this.cars.forEach((car) => {
+          if (car.state === 'Accident'){
+            const index = this.cars.indexOf(car);
+            if (index !== -1) {
+              this.cars.splice(index, 1);
+            }
           }
         });
-        this.accidents.splice(0, this.accidents.length);
+
+        this.bots.forEach((element) => {
+          if (element.state === 'accidente'){
+            const index = this.bots.indexOf(element);
+            if (index !== -1) {
+              this.bots.splice(index, 1);
+            }
+          }
+        });
+
+        this.accidents = 0 ;
       },
 
       addObserver(propertyName) {
@@ -196,7 +208,7 @@ function app() {
       // },
 
       async appearBot(){        
-        const botModule = await import('/bot.js');
+        const botModule = await import('./bot.js');
         const Bot = botModule.Bot ;
         
         let botPoint = new Bot(0.5, this.road, 'Voiture', undefined);
@@ -204,7 +216,7 @@ function app() {
       },
 
       async appearCar(){        
-        const carModule = await import('/vehicule.js');
+        const carModule = await import('./vehicule.js');
         const Vehicule = carModule.Vehicule ;
         
         let vehicule = new Vehicule(1/200, this.mood, this.curve, 'Voiture', undefined);
@@ -275,10 +287,12 @@ function app() {
         this.cars.forEach((car) => {
           this.bots.forEach((element) => {
             if (Math.abs(car.x - element.x) <= 10 && Math.abs(car.y-element.y <= 10 )){
+              if (car.state !== 'Accident') this.accidents++ ;
+              if (element.state !== 'accidente') this.accidents++ ;
               car.state = 'Accident';
               car.accidente = true ;
               element.state = 'accidente';
-              this.accidents += 2;
+              
             }
           });
         });
