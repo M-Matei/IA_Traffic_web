@@ -287,8 +287,14 @@ function app() {
         this.cars.forEach((car) => {
           this.bots.forEach((element) => {
             if (Math.abs(car.x - element.x) <= 10 && Math.abs(car.y-element.y <= 10 )){
-              if (car.state !== 'Accident') this.accidents++ ;
-              if (element.state !== 'accidente') this.accidents++ ;
+              if (car.state !== 'Accident') {
+                this.accidents++ ;
+                this.errors++ ;
+              }
+              if (element.state !== 'accidente') {
+                this.accidents++ ;
+                this.errors++ ;
+              }
               car.state = 'Accident';
               car.accidente = true ;
               element.state = 'accidente';
@@ -300,8 +306,9 @@ function app() {
         // mise à jour de l'état du feu tricolore
         this.drawPoint(this.feu.positionCoords()[0], this.feu.positionCoords()[1], 7, this.feu.state);
 
-        // this.endGame = this.game.isEndOfGame();
+        this.endGame = this.game.isEndOfGame();
         if (this.trafficJam >= 15) this.endGame = true ;
+        if (this.errors >= this.nbFails) this.endGame = true ;
         if (!this.endGame) {
           requestAnimationFrame(() => this.animate());
         } else if (this.endGame && this.score < this.heureux) {

@@ -38,7 +38,7 @@ export class Game {
     }
 
     isEndOfGame(){
-        if (parseFloat(this.chrono) >= this.timeEnd || this.errors >= this.nbFails) {
+        if (parseFloat(this.chrono) >= this.timeEnd) {
             this.endGame = true ;
         }
         return this.endGame ;
