@@ -9,19 +9,40 @@ export class Bot {
     x = null;
     y = null;
     
-    constructor(speed, curve, type){
-        this.speed = speed;
+    constructor(speed, curve, type, position){
 
-        this.curve = curve;
+        if (position === undefined) {
+            this.speed = speed;
 
-        this.type = type ;
-        if (type === 'Voiture') {
-            this.diameter = 6 ;
-        } else if (type === 'Camion') {
-            this.diameter = 9 ;
-        }
+            this.curve = curve;
 
-        this.positionCoords();
+            this.type = type ;
+            if (type === 'Voiture') {
+                this.diameter = 6 ;
+            } else if (type === 'Camion') {
+                this.diameter = 9 ;
+            }
+
+            this.positionCoords();
+
+        } else {
+
+            this.speed = speed;
+
+            this.mood = mood;
+            this.curve = curve;
+
+            this.type = type ;
+            if (type === 'Voiture') {
+                this.diameter = 6 ;
+            } else if (type === 'Camion') {
+                this.diameter = 9 ;
+            }
+
+            this.step = position ;
+            this.positionCoords();
+
+      }
     }
 
     positionCoords(){
@@ -45,6 +66,10 @@ export class Bot {
         }
     }
 
+    clone(position){
+        return new Bot(this.speed, this.curve, this.type, position);
+    }
+
     // changement de couleur du véhicule en fonction de son état
     colored(){
         switch(this.state){
@@ -55,15 +80,4 @@ export class Bot {
         }
     }
 
-    checkCollisions(accidents){
-        if (accidents.length !== 0) {
-          accidents.forEach((element) => {
-            if (Math.abs(this.x - element.x) <= 10 && Math.abs(this.y-element.y <= 10 )){
-              this.state = 'accidente';
-              return -1 ;
-            }
-          });
-        }
-        return -2 ;
-    }
 }

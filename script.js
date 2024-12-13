@@ -38,7 +38,7 @@ function app() {
 
       cars : [],
       bots : [],
-      accidents : [],
+      accidents : 0,
 
       // // déplacement en temps réel de manière fluide
       // lastTimestamp:0,
@@ -199,7 +199,7 @@ function app() {
         const botModule = await import('/bot.js');
         const Bot = botModule.Bot ;
         
-        let botPoint = new Bot(0.5, this.road, 'Voiture');
+        let botPoint = new Bot(0.5, this.road, 'Voiture', undefined);
         this.bots.push(botPoint);
       },
 
@@ -207,7 +207,7 @@ function app() {
         const carModule = await import('/vehicule.js');
         const Vehicule = carModule.Vehicule ;
         
-        let vehicule = new Vehicule(1/200, this.mood, this.curve, 'Voiture');
+        let vehicule = new Vehicule(1/200, this.mood, this.curve, 'Voiture', undefined);
         this.cars.push(vehicule);
       },
 
@@ -219,6 +219,47 @@ function app() {
 
         this.chrono = this.game.chrono ;
 
+        this.trafficJam = 0 ;
+        this.cars.forEach((car) => {
+          const numero = this.cars.indexOf(car);
+
+          // Vérifie sur le comportement du véhicule précédent
+          let vision = [-1, -1];
+          if (numero !== 0) {
+            vision = [this.cars[numero-1].lastVariation, this.cars[numero-1].step];
+          }
+
+          let infosCar = car.speedVariation(this.game, this.feu, vision, this.bots, this.accidents);
+          if (infosCar[0] !== -1) {
+
+            // renvoie l'état du conducteur en fonction du paramètre Humeur : temps d'attente avant changement d'état
+            car.waiting(car.mood);
+
+            // mise à jour de la position du point sur la courbe
+            this.drawPoint(infosCar[0][0], infosCar[0][1], 4.5, car.colored());            
+            
+          } else {
+
+            // si le véhicule arrive en fin de courbe de Bézier
+            if (!car.furious) this.score++ ;
+            if (numero !== -1) {
+              this.cars.splice(numero, 1);
+            }
+          }
+
+          // si le feu est rouge et que la voiture est arrêtée
+          if (infosCar[2] === true) this.trafficJam++ ;
+          if (car.state === 'Furieux' && !car.furious) {
+              this.errors++ ;
+              car.furious = true;
+          }
+          this.consoleLog = infosCar[1];
+
+          // si une voiture passe au feu jaune alors le feu redevient rouge
+          if (car.step > 0.76 && this.feu.state === 'yellow') this.feu.state = 'red';
+
+        });
+
         this.bots.forEach((bot) => {
           let coordsBot = bot.drive();
           const index = this.bots.indexOf(bot);
@@ -229,67 +270,20 @@ function app() {
               this.bots.splice(index, 1);
             }
           }
-
-          let collisionCar = bot.checkCollisions(this.accidents);
-            if (collisionCar !== -2){
-              this.bots[collisionCar].state = 'accidente';
-              this.accidents.push(this.bots[index].clone(this.bots[index].step));
-            }
-
         });
 
-        this.trafficJam = 0 ;
         this.cars.forEach((car) => {
-          const numero = this.cars.indexOf(car);
-          let vision = [-1, -1];
-          if (numero !== 0) {
-            vision = [this.cars[numero-1].lastVariation, this.cars[numero-1].step];
-          }
-          let infosCar = car.speedVariation(this.game, this.feu, vision);
-          if (infosCar[0] !== -1) {
-            car.waiting(car.mood);
-            this.drawPoint(infosCar[0][0], infosCar[0][1], 4.5, car.colored());
-            
-            let collisionCar = car.checkCollisions(this.bots, this.accidents);
-            if (collisionCar !== -2){
-              if (collisionCar === -1) {
-                this.accidents.push(car.clone(car.step));
-                if (numero !== -1) {
-                  this.cars.splice(numero, 1);
-                }
-              } else {
-                this.accidents.push(this.bots[collisionCar]);
-                this.bots[collisionCar].state = 'accidente';
-                this.accidents.push(car.clone(car.step));
-                this.accidents.push(this.bots[collisionCar].clone(this.bots[collisionCar].step));
-
-                if (numero !== -1) {
-                  this.cars.splice(numero, 1);
-                }
-                if (collisionCar !== -1) {
-                  this.bots.splice(collisionCar, 1);
-                }
-              }
+          this.bots.forEach((element) => {
+            if (Math.abs(car.x - element.x) <= 10 && Math.abs(car.y-element.y <= 10 )){
+              car.state = 'Accident';
+              car.accidente = true ;
+              element.state = 'accidente';
+              this.accidents += 2;
             }
+          });
+        });
 
-          } else {
-            if (!car.furious) this.score++ ;
-            if (numero !== -1) {
-              this.cars.splice(numero, 1);
-            }
-          }
-
-          if (infosCar[2] === true) this.trafficJam++ ;
-          if (car.state === 'Furieux' && !car.furious) {
-              this.errors++ ;
-              car.furious = true;
-          }
-          this.consoleLog = infosCar[1];
-          console.log(this.accidents);
-
-          if (car.step > 0.76 && this.feu.state === 'yellow') this.feu.state = 'red';
-      });
-
+        // mise à jour de l'état du feu tricolore
         this.drawPoint(this.feu.positionCoords()[0], this.feu.positionCoords()[1], 7, this.feu.state);
 
         // this.endGame = this.game.isEndOfGame();

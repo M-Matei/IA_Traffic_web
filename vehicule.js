@@ -200,28 +200,4 @@ export class Vehicule {
   clone(position){
     return new Vehicule(this.speed, this.mood, this.curve, this.type, position);
   }
-
-  checkCollisions(arrayBots, accidents){
-
-    if (accidents.length !== 0) {
-      accidents.forEach((element) => {
-        if (Math.abs(this.x - element.x) <= 10 && Math.abs(this.y-element.y <= 10 )){
-          this.state = 'Accident';
-          this.accidente = true ;
-          return -1 ;
-        }
-      });
-    }
-
-    arrayBots.forEach((element) => {
-      if (Math.abs(this.x - element.x) <= 10 && Math.abs(this.y-element.y <= 10 )){
-        this.state = 'Accident';
-        this.accidente = true ;
-        const indexBot = arrayBots.indexOf(element);
-        return indexBot ;
-      }
-    });
-
-    return -2 ;
-  }
 }

@@ -24,9 +24,11 @@
   <div x-data="app()">
     <canvas id="canvas" width="800" height="400" style="border: none"></canvas>
 
-    <button @click="endGame = true">Arrêt</button><button @click="console.log('n')">Enlever les véhicules accidentés</button>
+    <button @click="endGame = true">Arrêt</button>
+    <br><label>Nombre de véhicules accidentés : </label><b><span x-text="accidents"></span></b>
+    <button @click="clearAccidents()">Enlever les véhicules accidentés</button>
 
-    <br><b>Interaction avec le feu de circulation</b>
+    <br><br><b>Interaction avec le feu de circulation</b>
 
     <br><fieldset x-show='infosFeu'>
       <legend>Gestion du feu</legend>
@@ -79,14 +81,14 @@
     </template><br>
 
 
-    <br><br>
+    <!-- <br><br>
     <button @click="">Démarrer la simulation</button><br><br>
     <aside>Relancer la simulation ou réactualiser la page pour appliquer les changements de paramétrage marqué *</aside>
     <aside>Tous les autres paramètres sont modifiés en  temps réel</aside>
     
     <br><fieldset>
       <legend><b>Mission personnalisée * </b></legend>
-      <aside>EN COURS D'IMPLÉMENTATION</aside>
+      <aside>EN COURS D'IMPLÉMENTATION</aside> -->
 
     <!--  Implémenter mode infini et mission custom
 
